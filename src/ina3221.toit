@@ -55,21 +55,38 @@ class Ina3221:
   static POWER-VALID-LSB_                       ::= 0.008     // volts, 8 mV for upper and lower limits.
 
   /**
-  Alert Types that can set off the alert register and/or alert pin. See set-alert
+  Masks for use with $REGISTER-MASK-ENABLE_ register.  Mostly alert constants.
   */
-  /*
-  static ALERT-CONV-READY                       ::= (1UL << 0)  // Conversion Ready
-  static ALERT-TIMECONT-ALERT                   ::= (1UL << 1)  // Timing Control Alert
-  static ALERT-POWER-VALID                      ::= (1UL << 2)  // Power Valid Alert
-  static ALERT-WARN-CH3                         ::= (1UL << 3)  // Warning Alert for Channel 3
-  static ALERT-WARN-CH2                         ::= (1UL << 4)  // Warning Alert for Channel 2
-  static ALERT-WARN-CH1                         ::= (1UL << 5)  // Warning Alert for Channel 1
-  static ALERT-SUMMATION                        ::= (1UL << 6)  // Summation Alert
-  static ALERT-CRITICAL-CH3                     ::= (1UL << 7)  // Critical Alert for Channel 3
-  static ALERT-CRITICAL-CH2                     ::= (1UL << 8)  // Critical Alert for Channel 2
-  static ALERT-CRITICAL-CH1                     ::= (1UL << 9)  // Critical Alert for Channel 1
-  */
-
+  static ALERT-CONVERSION-READY-FLAG_    ::= 0b00000000_00000001
+  static ALERT-CONVERSION-READY-OFFSET_  ::= 0
+  static ALERT-TIMING-CONTROL-FLAG_      ::= 0b00000000_00000010
+  static ALERT-TIMING-CONTROL-OFFSET_    ::= 1
+  static ALERT-POWER-VALID-FLAG_         ::= 0b00000000_00000100
+  static ALERT-POWER-VALID-OFFSET_       ::= 2
+  static ALERT-WARN-CH3-FLAG_            ::= 0b00000000_00001000
+  static ALERT-WARN-CH3-OFFSET_          ::= 3
+  static ALERT-WARN-CH2-FLAG_            ::= 0b00000000_00010000
+  static ALERT-WARN-CH2-OFFSET_          ::= 4
+  static ALERT-WARN-CH1-FLAG_            ::= 0b00000000_00100000
+  static ALERT-WARN-CH1-OFFSET_          ::= 5
+  static ALERT-SUMMATION-FLAG_           ::= 0b00000000_01000000
+  static ALERT-SUMMATION-OFFSET_         ::= 6
+  static ALERT-CRITICAL-CH3-FLAG_        ::= 0b00000000_10000000
+  static ALERT-CRITICAL-CH3-OFFSET_      ::= 7
+  static ALERT-CRITICAL-CH2-FLAG_        ::= 0b00000001_00000000
+  static ALERT-CRITICAL-CH2-OFFSET_      ::= 8
+  static ALERT-CRITICAL-CH1-FLAG_        ::= 0b00000010_00000000
+  static ALERT-CRITICAL-CH1-OFFSET_      ::= 9
+  static CRITICAL-ALERT-LATCH-FLAG_      ::= 0b00000100_00000000
+  static CRITICAL-ALERT-LATCH-OFFSET_    ::= 10
+  static WARNING-ALERT-LATCH-FLAG_       ::= 0b00001000_00000000
+  static WARNING-ALERT-LATCH-OFFSET_     ::= 11
+  static SUMMATION-CONTROL-CH3-FLAG_     ::= 0b00010000_00000000
+  static SUMMATION-CONTROL-CH3-OFFSET_   ::= 12
+  static SUMMATION-CONTROL-CH2-FLAG_     ::= 0b00100000_00000000
+  static SUMMATION-CONTROL-CH2-OFFSET_   ::= 13
+  static SUMMATION-CONTROL-CH1-FLAG_     ::= 0b01000000_00000000
+  static SUMMATION-CONTROL-CH1-OFFSET_   ::= 14  
   /** 
   Sampling options used for measurements. To be used with set-sampling-rate.
   Represents the number of samples that will be averaged for each measurement.
@@ -191,10 +208,10 @@ class Ina3221:
     disable-channel --channel=2
 
     /*
-    // Performing a single measurement during initialisation assists with accuracy for first reads.
+    Performing a single measurement during initialisation assists with accuracy for first reads.
+    */
     trigger-single-measurement
     wait-until-conversion-completed
-    */
 
   /**
   $reset_: Reset Device.
@@ -203,7 +220,6 @@ class Ina3221:
   */
   reset_ -> none:
     write-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-RESET-MASK_ --offset=CONF-RESET-OFFSET_ --value=0b1
-
 
   /** 
   $read-manufacturer-id: Get Manufacturer identifier.
@@ -362,6 +378,46 @@ class Ina3221:
     raw-value := (reg_.read-i16-be REGISTER-POWERVALID-LOWER-LIMIT_) >> 3
     return raw-value * POWER-VALID-LSB_
 
+  /**
+  $trigger-single-measurement: initiate a single measurement without waiting for completion.
+  */
+  trigger-single-measurement -> none:
+    trigger-single-measurement --nowait
+    wait-until-conversion-completed
+  
+  /** 
+  $trigger-single-measurement: perform a single conversion - without waiting.
+  */
+  trigger-single-measurement --nowait -> none:
+    mask-register-value/int   := reg_.read-u16-be REGISTER-MASK-ENABLE_               // Reading clears CNVR (Conversion Ready) Flag.
+    config-register-value/int   := reg_.read-u16-be REGISTER-CONFIGURATION_    
+    reg_.write-u16-be REGISTER-CONFIGURATION_ config-register-value                   // Starts conversion.
+
+  /**
+  $wait-until-conversion-completed: execution blocked until conversion is completed.
+  */
+  wait-until-conversion-completed -> none:
+    max-wait-time-ms/int   := get-estimated-conversion-time-ms
+    current-wait-time-ms/int   := 0
+    sleep-interval-ms/int := 50
+    while busy:                                                      // Checks if sampling is completed.
+      sleep --ms=sleep-interval-ms
+      current-wait-time-ms += sleep-interval-ms
+      if current-wait-time-ms >= max-wait-time-ms:
+        logger_.debug "wait-until-conversion-completed: maxWaitTime $(max-wait-time-ms)ms exceeded - breaking"
+        break
+
+  /** 
+  $busy: Returns true if conversion is still ongoing 
+  
+  Register MASK-ENABLE is read each poll.  In practices it does return the pre-clear CNVR
+  bit, but reading also clears it. Loops using `while busy` will work (eg. false when 
+  flag is 1), but it does mean a single poll will consume the flag. (This is already compensated
+  for with the loop in 'wait-until-' functions'.)
+  */
+  busy -> bool:
+    value/int := read-register_ --register=REGISTER-MASK-ENABLE_
+    return (((read-register_ --register=REGISTER-MASK-ENABLE_) & ALERT-CONVERSION-READY-FLAG_) == 0)
 
   /**
   $enable-channel: Enable channel
@@ -390,12 +446,30 @@ class Ina3221:
   /**
   $disable-channel: Disable channel
   */
-  enabled-channels -> int:
+  enabled-channel-count -> int:
     out := 0 
     out += read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH1-ENABLE-MASK_ --offset=CONF-CH1-ENABLE-OFFSET_
     out += read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH2-ENABLE-MASK_ --offset=CONF-CH2-ENABLE-OFFSET_
     out += read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH3-ENABLE-MASK_ --offset=CONF-CH3-ENABLE-OFFSET_
     return out
+
+  /**
+  $disable-channel: Disable channel
+  */
+  channel-enabled --channel/int -> bool:
+    assert: 1 <= channel <= 3
+    out/bool := false
+    if channel == 1: 
+      out = (read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH1-ENABLE-MASK_ --offset=CONF-CH1-ENABLE-OFFSET_) == 1
+      return out
+    else if channel == 2: 
+      out = (read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH2-ENABLE-MASK_ --offset=CONF-CH2-ENABLE-OFFSET_) == 1
+      return out
+    else if channel == 3: 
+      out = (read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH3-ENABLE-MASK_ --offset=CONF-CH3-ENABLE-OFFSET_) == 1
+      return out
+    else:
+      return out
 
   /**
   $set-shunt-resistor --resistor --max-current: Set resistor and current range.
@@ -414,23 +488,37 @@ class Ina3221:
     //imax_A_[ch]      = 0.16384 / resistor               // ≈ FS current (A)
 
   read-shunt-voltage --channel/int -> float?:
-    if (channel < 1) or (channel > 3) : return null;
+    if (channel < 1) or (channel > 3) : return null
+    if not channel-enabled --channel=channel: return null
     raw-shunt-voltage := reg_.read-i16-be (REGISTER-SHUNT-VOLTAGE-CH1_ + ((channel - 1) * 2))
     return  (raw-shunt-voltage >> 3) * SHUNT-VOLTAGE-LSB_
 
   read-bus-voltage --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
+    if not channel-enabled --channel=channel: return null
     raw-bus-voltage := reg_.read-i16-be (REGISTER-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2))
     return  (raw-bus-voltage >> 3) * BUS-VOLTAGE-LSB_
 
   read-current --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
+    if not channel-enabled --channel=channel: return null
     raw-shunt-counts := reg_.read-i16-be (REGISTER-SHUNT-VOLTAGE-CH1_ + ((channel - 1) * 2))
     return (raw-shunt-counts >> 3) * current-LSB_[channel]
 
   read-power --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
+    if not channel-enabled --channel=channel: return null
     return (read-bus-voltage --channel=channel) * (read-current --channel=channel)
+
+  /**
+  read-supply-voltage:
+  
+  The INA3221 defines bus voltage as the voltage on the IN– pin to GND. The shunt voltage is IN+ – IN–. So the upstream supply at IN+ is: Vsupply@IN+ = Vbus(IN–→GND) + Vshunt(IN+−IN–).
+  */
+  read-supply-voltage --channel/int -> float?:
+    if (channel < 1) or (channel > 3) : return null
+    if not channel-enabled --channel=channel: return null
+    return (read-bus-voltage --channel=channel) * (read-shunt-voltage --channel=channel)
 
   /**
   $get-conversion-time-us-from-enum: Returns microsecs for TIMING-x-US statics 0..7 (values as stored in the register).
@@ -483,7 +571,7 @@ class Ina3221:
     //if (mode & 0b100) != 0:  time-contribution += bus-conversion-time     // continuous mask    = 0b100
 
     // Essentially 3 profiles: Off, Triggered, and Continuous. BUS+/SHUNT voltage consumptions are not given
-    total-us/int    := (time-contribution-us) * sampling-rate * enabled-channels
+    total-us/int    := time-contribution-us * sampling-rate * enabled-channel-count
 
     // Add a small guard factor (~10%) to be conservative.
     total-us = ((total-us * 11.0) / 10.0).to-int
@@ -494,8 +582,6 @@ class Ina3221:
 
     //logger_.debug "get-estimated-conversion-time-ms is: $(total-ms)ms"
     return total-ms
-
-
 
   /** 
   $read-register_: Given that register reads are largely similar, implemented here.
@@ -531,7 +617,7 @@ class Ina3221:
       new-value     &= ~mask
       new-value     |= (value << offset)
       reg_.write-u16-be register new-value
-      logger_.debug "write-register_: Register 0x$(%02x register) set from $(bits-16 old-value) to $(bits-16 new-value) $(note)"
+      //logger_.debug "write-register_: Register 0x$(%02x register) set from $(bits-16 old-value) to $(bits-16 new-value) $(note)"
 
   /** 
   $mask-offset: calculate mask offset instead of passing them around?
