@@ -174,7 +174,7 @@ class Ina3221:
     reg_ = dev.registers
     
     if (read-device-identification != INA3221-DEVICE-ID): 
-      logger_.debug "Device is NOT an INA3221 (0x$(%04x INA3221-DEVICE-ID) [Device ID:0x$(%04x read-device-identification)]) "
+      logger_.debug "Device is NOT an INA3221 (Expecting ID:0x$(%04x INA3221-DEVICE-ID) Got ID:0x$(%04x read-device-identification))"
       logger_.debug "Device is man-id=0x$(%04x read-manufacturer-id) dev-id=0x$(%04x read-device-identification) rev=0x$(%04x read-device-revision)"
       throw "Device is not an INA3221."
 
@@ -192,25 +192,14 @@ class Ina3221:
 
     // Set Defaults for Shunt Resistor - module usually ships with R100 (0.100 Ohm) on all three
     // channels
-    set-shunt-resistor --channel=1 --resistor=0.100
-    set-shunt-resistor --channel=2 --resistor=0.100
-    set-shunt-resistor --channel=3 --resistor=0.100
+    set-shunt-resistor 0.100 --channel=1
+    set-shunt-resistor 0.100 --channel=2
+    set-shunt-resistor 0.100 --channel=3
    
-    print "power valid upper limit=$(get-valid-power-upper-limit)"
-    print "power valid lower limit=$(get-valid-power-lower-limit)"
-    //set-valid-power-lower-limit 3.3
-    print "power valid lower limit=$(get-valid-power-lower-limit)"
-
-    enable-channel --channel=1
-    enable-channel --channel=2
-    enable-channel --channel=3
-    print "DISABLED CHANNEL 2"
-    disable-channel --channel=2
-
     /*
     Performing a single measurement during initialisation assists with accuracy for first reads.
     */
-    trigger-single-measurement
+    trigger-measurement
     wait-until-conversion-completed
 
   /**
@@ -379,16 +368,19 @@ class Ina3221:
     return raw-value * POWER-VALID-LSB_
 
   /**
-  $trigger-single-measurement: initiate a single measurement without waiting for completion.
+  $trigger-measurement: initiate a single measurement without waiting for completion.
   */
-  trigger-single-measurement -> none:
-    trigger-single-measurement --nowait
+  trigger-measurement -> none:
+    trigger-measurement --nowait
     wait-until-conversion-completed
   
   /** 
-  $trigger-single-measurement: perform a single conversion - without waiting.
+  $trigger-measurement: perform a single conversion - without waiting.
+
+  TRIGGERED MODE:  Executes single measurement
+  CONTINUOUS MODE: Refreshes data
   */
-  trigger-single-measurement --nowait -> none:
+  trigger-measurement --nowait -> none:
     mask-register-value/int   := reg_.read-u16-be REGISTER-MASK-ENABLE_               // Reading clears CNVR (Conversion Ready) Flag.
     config-register-value/int   := reg_.read-u16-be REGISTER-CONFIGURATION_    
     reg_.write-u16-be REGISTER-CONFIGURATION_ config-register-value                   // Starts conversion.
@@ -472,12 +464,12 @@ class Ina3221:
       return out
 
   /**
-  $set-shunt-resistor --resistor --max-current: Set resistor and current range.
+  $set-shunt-resistor: Set resistor and current range.
   
   Set shunt resistor value, input is in Ohms. If no --max-current is computed from +/-163.84 mV full scale. 
   Current range in amps.
   */
-  set-shunt-resistor --channel/int --resistor/float -> none:
+  set-shunt-resistor resistor/float --channel/int -> none:
     assert: 1 <= channel <= 3
     shunt-resistor_[channel]     = resistor
     current-LSB_[channel]        = SHUNT-VOLTAGE-LSB_ / resistor
@@ -499,7 +491,7 @@ class Ina3221:
     raw-bus-voltage := reg_.read-i16-be (REGISTER-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2))
     return  (raw-bus-voltage >> 3) * BUS-VOLTAGE-LSB_
 
-  read-current --channel/int -> float?:
+  read-shunt-current --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
     raw-shunt-counts := reg_.read-i16-be (REGISTER-SHUNT-VOLTAGE-CH1_ + ((channel - 1) * 2))
@@ -508,7 +500,7 @@ class Ina3221:
   read-power --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
-    return (read-bus-voltage --channel=channel) * (read-current --channel=channel)
+    return (read-bus-voltage --channel=channel) * (read-shunt-current --channel=channel)
 
   /**
   read-supply-voltage:
