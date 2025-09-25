@@ -23,6 +23,19 @@ There are two main variations of module both with different wiring requirements 
 - Single-shot/Triggered: Once triggered, the chip converts every enabled channel once, then enters power-down. 
 - Power-down: lowest quiescent; registers keep last values; 40 µs recovery time to activate. 
 
+## LEDs
+Whilst the IC itself has no LEDs, many breakout boards/modules with the chip have LEDs. These are typically wired to the INA3221’s open-drain alert pins (plus one “power” LED).  The usually have silkscreened labels, and indicate:
+- Power LED – just shows the board has VS power. Some boards even have a solder jumper to disable it. 
+- CRI / “Critical” LED – lights when any enabled channel’s instantaneous shunt reading exceeds the programmed Critical-Alert limit. Active-low (the pin sinks current when tripped). 
+- WRN / “Warning” LED – lights when the averaged shunt reading exceeds the Warning-Alert limit (depends on your averaging setting). Also active-low. 
+- PV / “Power-Valid” LED – indicates whether all bus voltages are inside the programmable PV window. The PV pin is open-drain pulled up via VPU; “valid” releases high, “invalid” pulls low. Default PV window is ~9–10 V until changed see `set-valid-power-upper-limit` and `set-valid-power-lower-limit`  in the driver. 
+- TC / “Timing-Control” LED – lights if the power-up sequencing between rails violates the timing rules (e.g., a rail didn’t reach ~1.2 V in time). Active-low. 
+
+### Why a PV (or other) LED might seem “wrong”
+Unused channels: PV checks all three bus voltages. If any unused channel is floating, PV will read “invalid” and keep the LED on. Tie unused IN− to a used rail (and float IN+) or disable conversions for that channel / widen the PV window. 
+Open-drain logic: These pins pull low on fault; many boards wire LEDs so “on = fault.” That’s expected. 
+Limits not set / out of range: CRI/WRN default to “disabled” (full-scale). Program the 13-bit limit fields (bits 15–3, LSB = 40 µV across the shunt) and make sure you enable the alert bits/masks
+
 ## Conversion time & averaging (how long to wait)
 For a “both” conversion cycle:  Update time = (CTshunt + CTbus) × averages × (# enabled channels). 
 

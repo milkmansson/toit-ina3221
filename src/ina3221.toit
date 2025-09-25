@@ -10,9 +10,7 @@
 
 
 /**
-
-
-The INA3221 works a bit differently from the INA226, so there is no register for calibration values, or 
+The INA3221 works a bit differently from the INA226: there is no register for calibration values, or 
 the 0.00512/Current_LSB formula. The INA3221 only gives shunt voltage and bus voltage per channel;
 meaning the current (and power) are calculated in software.
 
@@ -54,39 +52,7 @@ class Ina3221:
   static BUS-VOLTAGE-LSB_                       ::= 0.008     // volts, 8 mV (per channel).
   static POWER-VALID-LSB_                       ::= 0.008     // volts, 8 mV for upper and lower limits.
 
-  /**
-  Masks for use with $REGISTER-MASK-ENABLE_ register.  Mostly alert constants.
-  */
-  static ALERT-CONVERSION-READY-FLAG_    ::= 0b00000000_00000001
-  static ALERT-CONVERSION-READY-OFFSET_  ::= 0
-  static ALERT-TIMING-CONTROL-FLAG_      ::= 0b00000000_00000010
-  static ALERT-TIMING-CONTROL-OFFSET_    ::= 1
-  static ALERT-POWER-VALID-FLAG_         ::= 0b00000000_00000100
-  static ALERT-POWER-VALID-OFFSET_       ::= 2
-  static ALERT-WARN-CH3-FLAG_            ::= 0b00000000_00001000
-  static ALERT-WARN-CH3-OFFSET_          ::= 3
-  static ALERT-WARN-CH2-FLAG_            ::= 0b00000000_00010000
-  static ALERT-WARN-CH2-OFFSET_          ::= 4
-  static ALERT-WARN-CH1-FLAG_            ::= 0b00000000_00100000
-  static ALERT-WARN-CH1-OFFSET_          ::= 5
-  static ALERT-SUMMATION-FLAG_           ::= 0b00000000_01000000
-  static ALERT-SUMMATION-OFFSET_         ::= 6
-  static ALERT-CRITICAL-CH3-FLAG_        ::= 0b00000000_10000000
-  static ALERT-CRITICAL-CH3-OFFSET_      ::= 7
-  static ALERT-CRITICAL-CH2-FLAG_        ::= 0b00000001_00000000
-  static ALERT-CRITICAL-CH2-OFFSET_      ::= 8
-  static ALERT-CRITICAL-CH1-FLAG_        ::= 0b00000010_00000000
-  static ALERT-CRITICAL-CH1-OFFSET_      ::= 9
-  static CRITICAL-ALERT-LATCH-FLAG_      ::= 0b00000100_00000000
-  static CRITICAL-ALERT-LATCH-OFFSET_    ::= 10
-  static WARNING-ALERT-LATCH-FLAG_       ::= 0b00001000_00000000
-  static WARNING-ALERT-LATCH-OFFSET_     ::= 11
-  static SUMMATION-CONTROL-CH3-FLAG_     ::= 0b00010000_00000000
-  static SUMMATION-CONTROL-CH3-OFFSET_   ::= 12
-  static SUMMATION-CONTROL-CH2-FLAG_     ::= 0b00100000_00000000
-  static SUMMATION-CONTROL-CH2-OFFSET_   ::= 13
-  static SUMMATION-CONTROL-CH1-FLAG_     ::= 0b01000000_00000000
-  static SUMMATION-CONTROL-CH1-OFFSET_   ::= 14  
+
   /** 
   Sampling options used for measurements. To be used with set-sampling-rate.
   Represents the number of samples that will be averaged for each measurement.
@@ -142,7 +108,9 @@ class Ina3221:
   static DIE-ID-DID-MASK_                       ::= 0xFFF0 //R  // Masks its part of the REGISTER-DIE-ID Register
   static DIE-ID-DID-OFFSET_                     ::= 4      
 
-  // Configuration Register bitmasks.
+  /**
+  Masks for use with $REGISTER-CONFIGURATION_ register.
+  */
   static CONF-RESET-MASK_                       ::= 0x8000
   static CONF-RESET-OFFSET_                     ::= 15
   static CONF-AVERAGE-MASK_                     ::= 0x0E00
@@ -159,6 +127,40 @@ class Ina3221:
   static CONF-CH2-ENABLE-OFFSET_                ::= 13
   static CONF-CH3-ENABLE-MASK_                  ::= 0b00010000_00000000
   static CONF-CH3-ENABLE-OFFSET_                ::= 12
+
+  /**
+  Masks for use with $REGISTER-MASK-ENABLE_ register.
+  */
+  static ALERT-CONVERSION-READY-FLAG_           ::= 0b00000000_00000001
+  static ALERT-CONVERSION-READY-OFFSET_         ::= 0
+  static ALERT-TIMING-CONTROL-FLAG_             ::= 0b00000000_00000010
+  static ALERT-TIMING-CONTROL-OFFSET_           ::= 1
+  static ALERT-POWER-VALID-FLAG_                ::= 0b00000000_00000100
+  static ALERT-POWER-VALID-OFFSET_              ::= 2
+  static ALERT-WARN-CH3-FLAG_                   ::= 0b00000000_00001000
+  static ALERT-WARN-CH3-OFFSET_                 ::= 3
+  static ALERT-WARN-CH2-FLAG_                   ::= 0b00000000_00010000
+  static ALERT-WARN-CH2-OFFSET_                 ::= 4
+  static ALERT-WARN-CH1-FLAG_                   ::= 0b00000000_00100000
+  static ALERT-WARN-CH1-OFFSET_                 ::= 5
+  static ALERT-SUMMATION-FLAG_                  ::= 0b00000000_01000000
+  static ALERT-SUMMATION-OFFSET_                ::= 6
+  static ALERT-CRITICAL-CH3-FLAG_               ::= 0b00000000_10000000
+  static ALERT-CRITICAL-CH3-OFFSET_             ::= 7
+  static ALERT-CRITICAL-CH2-FLAG_               ::= 0b00000001_00000000
+  static ALERT-CRITICAL-CH2-OFFSET_             ::= 8
+  static ALERT-CRITICAL-CH1-FLAG_               ::= 0b00000010_00000000
+  static ALERT-CRITICAL-CH1-OFFSET_             ::= 9
+  static CRITICAL-ALERT-LATCH-FLAG_             ::= 0b00000100_00000000
+  static CRITICAL-ALERT-LATCH-OFFSET_           ::= 10
+  static WARNING-ALERT-LATCH-FLAG_              ::= 0b00001000_00000000
+  static WARNING-ALERT-LATCH-OFFSET_            ::= 11
+  static SUMMATION-CONTROL-CH3-FLAG_            ::= 0b00010000_00000000
+  static SUMMATION-CONTROL-CH3-OFFSET_          ::= 12
+  static SUMMATION-CONTROL-CH2-FLAG_            ::= 0b00100000_00000000
+  static SUMMATION-CONTROL-CH2-OFFSET_          ::= 13
+  static SUMMATION-CONTROL-CH1-FLAG_            ::= 0b01000000_00000000
+  static SUMMATION-CONTROL-CH1-OFFSET_          ::= 14 
 
   static INA3221-DEVICE-ID                      ::= 0x0322
 
@@ -199,8 +201,7 @@ class Ina3221:
     /*
     Performing a single measurement during initialisation assists with accuracy for first reads.
     */
-    trigger-measurement
-    wait-until-conversion-completed
+    trigger-measurement --wait=true
 
   /**
   $reset_: Reset Device.
@@ -210,31 +211,18 @@ class Ina3221:
   reset_ -> none:
     write-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-RESET-MASK_ --offset=CONF-RESET-OFFSET_ --value=0b1
 
-  /** 
-  $read-manufacturer-id: Get Manufacturer identifier.
+  /**
+  $set-shunt-resistor: Set resistor and current range.
   
-  Useful if expanding driver to suit an additional sibling devices.
+  Set shunt resistor value, input is in Ohms. If no --max-current is computed from +/-163.84 mV full scale. 
+  Current range in amps.
   */
-  read-manufacturer-id -> int:
-    return reg_.read-u16-be REGISTER-MANUF-ID_
-  
-  /** 
-  $read-device-identification: returns integer of device ID bits from register.
-  
-  Bits 4-15 Stores the device identification bits.
-  */
-  read-device-identification -> int:
-    return read-register_ --register=REGISTER-DIE-ID_ --mask=DIE-ID-DID-MASK_ --offset=DIE-ID-DID-OFFSET_
-
-  /** 
-  $read-device-revision: Die Revision ID Bits.
-  
-  Bits 0-3 store the device revision number bits.
-  */
-  read-device-revision -> int:
-    return read-register_ --register=REGISTER-DIE-ID_ --mask=DIE-ID-RID-MASK_ --offset=0
-
-
+  set-shunt-resistor resistor/float --channel/int -> none:
+    assert: 1 <= channel <= 3
+    shunt-resistor_[channel]     = resistor
+    current-LSB_[channel]        = SHUNT-VOLTAGE-LSB_ / resistor
+    full-scale-current_[channel] = SHUNT-FULL-SCALE-VOLTAGE-LIMIT_ / resistor  // max current
+    
   /** 
   $set-measure-mode: Sets Measure Mode. 
   
@@ -321,29 +309,93 @@ class Ina3221:
   get-sampling-rate-us -> int:
     return get-sampling-rate-from-enum get-sampling-rate
 
-  
-  /** valid power registers
+
+  /**
+  Set the Critical-Alert threshold  --current (in amps) for a specific channel.
+
+  Critical compares and will assert on each conversion.
+  */
+  set-critical-alert-threshold --current/float --channel/int -> none:
+    assert: 1 <= channel <= 3
+    threshold-value/int := (current / current-LSB_[channel]).round << 3
+    write-register_ --register=(REGISTER-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --value=threshold-value
+    //logger_.info "set-critical-alert-threshold: current=$(%0.3f current) [volts: $(%0.3f get-critical-alert-threshold --voltage --channel=channel)]"
+
+  get-critical-alert-threshold --current --channel/int -> float:
+    assert: 1 <= channel <= 3
+    raw-read := reg_.read-u16-be (REGISTER-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2))
+    return ((raw-read & 0xFFF8) >> 3) * current-LSB_[channel]
+
+  set-critical-alert-threshold --voltage/float --channel/int -> none:
+    assert: 1 <= channel <= 3
+    threshold-value/int := (voltage / SHUNT-VOLTAGE-LSB_).round << 3
+    write-register_ --register=(REGISTER-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --value=threshold-value
+    //logger_.info "set-critical-alert-threshold: voltage=$(%0.3f voltage) [current: $(%0.3f get-critical-alert-threshold --current --channel=channel)]"
+
+  get-critical-alert-threshold --voltage --channel/int -> float:
+    assert: 1 <= channel <= 3
+    raw-read := reg_.read-u16-be (REGISTER-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2))
+    return ((raw-read & 0xFFF8) >> 3) * SHUNT-VOLTAGE-LSB_
+
+  /**
+  Set the Warning-Alert threshold  (in voltage or amps) for a specific channel.
+
+  Both the per-channel 'Critical/Warning limits' and the 'Summation' limit 
+  are programmed in the register in 'shunt voltage units' not actually in amps.
+  Warning compares the averaged shunt voltage (per AVG bits) and will assert accordingly.
+  */
+  set-warning-alert-threshold --current/float --channel/int -> none:
+    assert: 1 <= channel <= 3
+    threshold-value/int := (current / current-LSB_[channel]).round
+    if threshold-value > 4095: threshold-value = 4095
+    if threshold-value < 0: threshold-value = 0
+    write-register_ --register=(REGISTER-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --value=(threshold-value << 3)
+    //logger_.info "set-warning-alert-threshold: current=$(%0.3f current) [volts: $(%0.3f get-warning-alert-threshold --voltage --channel=channel)]"
+
+  get-warning-alert-threshold --current --channel/int -> float:
+    assert: 1 <= channel <= 3
+    raw-read := reg_.read-u16-be (REGISTER-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2))
+    return ((raw-read & 0xFFF8) >> 3) * current-LSB_[channel]
+
+  set-warning-alert-threshold --voltage/float --channel/int -> none:
+    assert: 1 <= channel <= 3
+    threshold-value/int := (voltage / SHUNT-VOLTAGE-LSB_).round
+    if threshold-value > 4095: threshold-value = 4095
+    if threshold-value < 0: threshold-value = 0
+    write-register_ --register=(REGISTER-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --value=(threshold-value << 3)
+    //logger_.info "set-warning-alert-threshold: volts=$(%0.3f voltage) [current: $(%0.3f get-warning-alert-threshold --current --channel=channel)]"
+
+  get-warning-alert-threshold --voltage --channel/int -> float:
+    assert: 1 <= channel <= 3
+    raw-read := reg_.read-u16-be (REGISTER-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2))
+    return ((raw-read & 0xFFF8) >> 3) * SHUNT-VOLTAGE-LSB_
+
+
+  /** Valid power registers
 
   These two registers contains upper and lower values used to determine if 'power-valid' conditions are met.
-  The power-valid condition is reached when all BUS-VOLTAGE channels are between the LOWER and UPPER values set
-  in the register. When the power-valid condition is met, the PV alert pin asserts high to indicate that the
-  INA3221 has confirmed all bus voltage channels are in the correct range
-
+  PV is not a “between L and U” window check.  PV (Power-Valid) works with hysteresis:
+  - PV goes valid (PV pin = high) only after all three bus voltages have first risen above the upper limit.
+  - Once valid, it stays valid until any bus voltage falls below the lower limit, then PV goes low (invalid).
+  - PV needs all three channels “present”.
+  - TI specifies PV requires all three bus-voltage channels to reach the upper limit. If a channel, is not in 
+  use, tie its IN− to a used rail and leave IN+ floating, or PV will never declare “valid.” 
+  - Simply disabling a channel in the config doesn’t make PV ignore it for this purpose.
   */
 
   /** 
   $set-valid-power-upper-limit: Sets upper limit for the valid power range.
 
-  Power-on reset value for upper limit is 2710h = 10.000V.
+  Power-on reset value for upper limit is 2710h = 10.000V.  See 'Valid power registers'
   */
   set-valid-power-upper-limit value/float -> none:
-    raw-value := (value / POWER-VALID-LSB_).to-int << 3
+    raw-value := (value / POWER-VALID-LSB_).round << 3
     reg_.write-i16-be REGISTER-POWERVALID-UPPER-LIMIT_ raw-value
 
   /** 
   $get-valid-power-upper-limit: Gets upper limit for the valid power range.
 
-  Power-on reset value for upper limit is 2710h = 10.000V.
+  Power-on reset value for upper limit is 0x2710 = 10.0V. See 'Valid power registers'
   */
   get-valid-power-upper-limit -> float:
     raw-value := (reg_.read-i16-be REGISTER-POWERVALID-UPPER-LIMIT_) >> 3
@@ -352,38 +404,66 @@ class Ina3221:
   /** 
   $set-valid-power-lower-limit: Sets lower limit for the valid power range.
 
-  Power-on reset value for upper limit is 2328h = 9.000V.
+  Power-on reset value for lower limit is 0x2328 = 9.0V. See 'Valid power registers'
   */
   set-valid-power-lower-limit value/float -> none:
-    raw-value := (value / POWER-VALID-LSB_).to-int << 3
+    raw-value := (value / POWER-VALID-LSB_).round << 3
     reg_.write-i16-be REGISTER-POWERVALID-LOWER-LIMIT_ raw-value
 
   /** 
   $get-valid-power-lower-limit: Gets lower limit for the valid power range.
 
-  Power-on reset value for upper limit is 2328h = 9.000V.
+  Power-on reset value for lower limit is 0x2328 = 9.0V. See 'Valid power registers'
   */
   get-valid-power-lower-limit -> float:
     raw-value := (reg_.read-i16-be REGISTER-POWERVALID-LOWER-LIMIT_) >> 3
     return raw-value * POWER-VALID-LSB_
 
-  /**
-  $trigger-measurement: initiate a single measurement without waiting for completion.
+  /** 
+  $set-shunt-summation-limit / $get-shunt-summation-limit: 
+
+  Sets limit for the voltage of the channels marked as involved in summation.
+  Both the per-channel 'Critical/Warning' limits and the 'Summation' limit 
+  are programmed in the register in 'shunt voltage units' not actually in amps.
+  Warning compares the averaged shunt voltage (per AVG bits) and will assert accordingly.
   */
-  trigger-measurement -> none:
-    trigger-measurement --nowait
-    wait-until-conversion-completed
+  set-shunt-summation-limit --voltage/float -> none:
+    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+      throw "set-summation-limit: summation invalid where shunt resistors differ."
+    raw-value := (voltage / SHUNT-VOLTAGE-LSB_).round << 1
+    reg_.write-i16-be REGISTER-SHUNTVOLTAGE-SUM-LIMIT_ raw-value
+    //logger_.info "set-shunt-summation-limit: voltage=$(voltage) [current: $(get-shunt-summation-limit --current)]"
+
+  get-shunt-summation-limit --voltage -> float:
+    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+      throw "set-summation-limit: summation invalid where shunt resistors differ."
+    raw-counts := reg_.read-i16-be REGISTER-SHUNTVOLTAGE-SUM-LIMIT_
+    return (raw-counts >> 1) * SHUNT-VOLTAGE-LSB_
   
+  set-shunt-summation-limit --current/float -> none:
+    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+      throw "set-summation-limit: summation invalid where shunt resistors differ."
+    raw-value/int := (current / current-LSB_[1]).round << 1
+    reg_.write-i16-be REGISTER-SHUNTVOLTAGE-SUM-LIMIT_ raw-value
+    //logger_.info "set-shunt-summation-limit: current=$(current) [volts: $(get-shunt-summation-limit --voltage)]"
+
+  get-shunt-summation-limit --current -> float:
+    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+      throw "set-summation-limit: summation invalid where shunt resistors differ."
+    raw-counts := reg_.read-i16-be REGISTER-SHUNTVOLTAGE-SUM-LIMIT_
+    return (raw-counts >> 1) * current-LSB_[1]
+
   /** 
   $trigger-measurement: perform a single conversion - without waiting.
 
   TRIGGERED MODE:  Executes single measurement
   CONTINUOUS MODE: Refreshes data
   */
-  trigger-measurement --nowait -> none:
+  trigger-measurement --wait/bool=true -> none:
     mask-register-value/int   := reg_.read-u16-be REGISTER-MASK-ENABLE_               // Reading clears CNVR (Conversion Ready) Flag.
     config-register-value/int   := reg_.read-u16-be REGISTER-CONFIGURATION_    
     reg_.write-u16-be REGISTER-CONFIGURATION_ config-register-value                   // Starts conversion.
+    if wait: wait-until-conversion-completed
 
   /**
   $wait-until-conversion-completed: execution blocked until conversion is completed.
@@ -396,7 +476,7 @@ class Ina3221:
       sleep --ms=sleep-interval-ms
       current-wait-time-ms += sleep-interval-ms
       if current-wait-time-ms >= max-wait-time-ms:
-        logger_.debug "wait-until-conversion-completed: maxWaitTime $(max-wait-time-ms)ms exceeded - breaking"
+        logger_.debug "wait-until-conversion-completed: maxWaitTime $(max-wait-time-ms)ms exceeded - continuing"
         break
 
   /** 
@@ -408,11 +488,99 @@ class Ina3221:
   for with the loop in 'wait-until-' functions'.)
   */
   busy -> bool:
-    value/int := read-register_ --register=REGISTER-MASK-ENABLE_
-    return (((read-register_ --register=REGISTER-MASK-ENABLE_) & ALERT-CONVERSION-READY-FLAG_) == 0)
+    value/int := read-register_ --register=REGISTER-MASK-ENABLE_ --mask=ALERT-CONVERSION-READY-FLAG_ --offset=ALERT-CONVERSION-READY-OFFSET_
+    return (value == 0)
+
+  /** 
+  $timing-control-alert
+  
+  Timing-control-alert flag indicator. Use this bit to determine if the timing control (TC)
+  alert pin has been asserted through software rather than hardware. The bit setting
+  corresponds to the status of the TC pin. This bit does not clear after it has been
+  asserted unless the power is recycled or a software reset is issued. The default state
+  for the timing control alert flag is high
+  */
+  timing-control-alert -> bool:
+    value/int := read-register_ --register=REGISTER-MASK-ENABLE_ --mask=ALERT-TIMING-CONTROL-FLAG_ --offset=ALERT-TIMING-CONTROL-OFFSET_
+    return (value == 1)
 
   /**
-  $enable-channel: Enable channel
+  $power-invalid-alert: Power-valid-alert flag indicator. 
+
+  This bit can be used to be able to determine if the
+  power valid (PV) alert pin has been asserted through software rather than hardware.
+  The bit setting corresponds to the status of the PV pin. This bit does not clear until the
+  condition that caused the alert is removed, and the PV pin has cleared.
+
+  The PV pin = high means “power valid,” low means “invalid.” The PVF bit in Mask/Enable
+  mirrors the PV status so firmware can read it. So printing “Valid-Power-Alert triggered”
+  when PVF=1 is a bit confusing—PVF=1 really means “rails are valid”.
+  */
+  power-invalid-alert -> bool:
+    value/int := read-register_ --register=REGISTER-MASK-ENABLE_ --mask=ALERT-POWER-VALID-FLAG_ --offset=ALERT-POWER-VALID-OFFSET_
+    return (value == 0)
+
+  /**
+  $current-warning-alert: Warning-alert flag indicator.
+
+  These bits are asserted if the corresponding channel
+  averaged measurement has exceeded the warning alert limit, resulting in the Warning
+  alert pin being asserted. Read these bits to determine which channel caused the
+  warning alert. The Warning Alert Flag bits clear when the Mask/Enable register is read
+  back
+  */
+  current-warning-alert --channel/int -> bool:
+    assert: 1 <= channel <= 3
+    if channel == 1:
+      return ((read-register_ --register=REGISTER-MASK-ENABLE_ --mask=ALERT-WARN-CH1-FLAG_ --offset=ALERT-WARN-CH1-OFFSET_) == 1)
+    if channel == 2:
+      return ((read-register_ --register=REGISTER-MASK-ENABLE_ --mask=ALERT-WARN-CH2-FLAG_ --offset=ALERT-WARN-CH2-OFFSET_) == 1)
+    if channel == 3:
+      return ((read-register_ --register=REGISTER-MASK-ENABLE_ --mask=ALERT-WARN-CH3-FLAG_ --offset=ALERT-WARN-CH3-OFFSET_) == 1)
+    return false
+
+  /**
+  $summation-alert: Summation-alert flag indicator.
+
+  This bit is asserted if the Shunt Voltage Sum register
+  exceeds the Shunt Voltage Sum Limit register. If the summation alert flag is asserted,
+  the Critical alert pin is also asserted. The Summation Alert Flag bit is cleared when the
+  Mask/Enable register is read back.
+  */
+  summation-alert -> bool:
+    value/int := read-register_ --register=REGISTER-MASK-ENABLE_ --mask=ALERT-SUMMATION-FLAG_ --offset=ALERT-SUMMATION-OFFSET_
+    return (value == 1)
+
+  /**
+  $critical-alert: Critical alert flag indicator.
+
+  Critical-alert flag indicator. These bits are asserted if the corresponding channel
+  measurement has exceeded the critical alert limit resulting in the Critical alert pin being
+  asserted. Read these bits to determine which channel caused the critical alert. The
+  critical alert flag bits are cleared when the Mask/Enable register is read back.
+  */
+  critical-alert --channel/int -> bool:
+    assert: 1 <= channel <= 3
+    if channel == 1:
+      return ((read-register_ --register=REGISTER-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH1-FLAG_ --offset=ALERT-CRITICAL-CH1-OFFSET_) == 1)
+    if channel == 2:
+      return ((read-register_ --register=REGISTER-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH2-FLAG_ --offset=ALERT-CRITICAL-CH2-OFFSET_) == 1)
+    if channel == 3:
+      return ((read-register_ --register=REGISTER-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH3-FLAG_ --offset=ALERT-CRITICAL-CH3-OFFSET_) == 1)
+    return false
+
+  /**
+  $clear-alert: clears alerts.
+  
+  Test well when used: datasheet suggests simply reading the MASK-ENABLE register is enough to clear any alerts.
+  */
+  clear-alert -> none:
+    register/int := read-register_ --register=REGISTER-MASK-ENABLE_
+
+  /**
+  $enable-channel: Enable channel.
+
+  These bits allow each channel to be independently enabled or disabled.
   */
   enable-channel --channel/int -> none:
     assert: 1 <= channel <= 3
@@ -436,7 +604,7 @@ class Ina3221:
       write-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH3-ENABLE-MASK_ --offset=CONF-CH3-ENABLE-OFFSET_ --value=0
 
   /**
-  $disable-channel: Disable channel
+  $enabled-channel-count: Count enabled channels
   */
   enabled-channel-count -> int:
     out := 0 
@@ -446,51 +614,82 @@ class Ina3221:
     return out
 
   /**
-  $disable-channel: Disable channel
+  $channel-enabled: Boolean of if the channel is enabled
   */
   channel-enabled --channel/int -> bool:
     assert: 1 <= channel <= 3
-    out/bool := false
-    if channel == 1: 
-      out = (read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH1-ENABLE-MASK_ --offset=CONF-CH1-ENABLE-OFFSET_) == 1
-      return out
-    else if channel == 2: 
-      out = (read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH2-ENABLE-MASK_ --offset=CONF-CH2-ENABLE-OFFSET_) == 1
-      return out
-    else if channel == 3: 
-      out = (read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH3-ENABLE-MASK_ --offset=CONF-CH3-ENABLE-OFFSET_) == 1
-      return out
-    else:
-      return out
+    if channel == 1:
+      return ((read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH1-ENABLE-MASK_ --offset=CONF-CH1-ENABLE-OFFSET_) == 1)
+    if channel == 2:
+      return ((read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH2-ENABLE-MASK_ --offset=CONF-CH2-ENABLE-OFFSET_) == 1)
+    if channel == 3:
+      return ((read-register_ --register=REGISTER-CONFIGURATION_ --mask=CONF-CH3-ENABLE-MASK_ --offset=CONF-CH3-ENABLE-OFFSET_) == 1)
+    return false
 
   /**
-  $set-shunt-resistor: Set resistor and current range.
-  
-  Set shunt resistor value, input is in Ohms. If no --max-current is computed from +/-163.84 mV full scale. 
-  Current range in amps.
+  $enable-summation: Enable summation for channel
   */
-  set-shunt-resistor resistor/float --channel/int -> none:
+  enable-summation --channel/int -> none:
     assert: 1 <= channel <= 3
-    shunt-resistor_[channel]     = resistor
-    current-LSB_[channel]        = SHUNT-VOLTAGE-LSB_ / resistor
-    full-scale-current_[channel] = SHUNT-FULL-SCALE-VOLTAGE-LIMIT_ / resistor  // max current
-    
-    //count_to_A_[ch]  = SHUNT_LSB_V / resistor           // A per shunt-count
-    //count_to_mA_[ch] = 1e3 * count_to_A_[ch]            // mA per shunt-count
-    //imax_A_[ch]      = 0.16384 / resistor               // ≈ FS current (A)
+    if channel == 1: 
+      write-register_ --register=REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH1-FLAG_ --offset=SUMMATION-CONTROL-CH1-OFFSET_ --value=1
+    else if channel == 2: 
+      write-register_ --register=REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH2-FLAG_ --offset=SUMMATION-CONTROL-CH2-OFFSET_ --value=1
+    else if channel == 3: 
+      write-register_ --register=REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH3-FLAG_ --offset=SUMMATION-CONTROL-CH3-OFFSET_ --value=1
 
+  /**
+  $disable-summation: Disable summation for channel
+  */
+  disable-summation --channel/int -> none:
+    assert: 1 <= channel <= 3
+    if channel == 1: 
+      write-register_ --register=REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH1-FLAG_ --offset=SUMMATION-CONTROL-CH1-OFFSET_ --value=0
+    else if channel == 2: 
+      write-register_ --register=REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH2-FLAG_ --offset=SUMMATION-CONTROL-CH2-OFFSET_ --value=0
+    else if channel == 3: 
+      write-register_ --register=REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH3-FLAG_ --offset=SUMMATION-CONTROL-CH3-OFFSET_ --value=0
+
+  /**
+  $channel-summation-enabled: Boolean of if channel is enabled in the summation
+  */
+  channel-summation-enabled --channel/int -> bool:
+    assert: 1 <= channel <= 3
+    if channel == 1:
+      return ((read-register_ --register=REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH1-FLAG_ --offset=SUMMATION-CONTROL-CH1-OFFSET_) == 1)
+    if channel == 2:
+      return ((read-register_ --register=REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH2-FLAG_ --offset=SUMMATION-CONTROL-CH2-OFFSET_) == 1)
+    if channel == 3:
+      return ((read-register_ --register=REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH3-FLAG_ --offset=SUMMATION-CONTROL-CH3-OFFSET_) == 1)
+    return false
+
+  /**
+  $read-shunt-voltage: averaged shunt-voltage measurement for each channel 
+  
+  Stored as an 11 bit value in the 16 bit register - 1 bit lost for sign
+  and the first three bits are simply unused and need to be shifted.
+  */
   read-shunt-voltage --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
     raw-shunt-voltage := reg_.read-i16-be (REGISTER-SHUNT-VOLTAGE-CH1_ + ((channel - 1) * 2))
     return  (raw-shunt-voltage >> 3) * SHUNT-VOLTAGE-LSB_
 
+  /**
+  $read-bus-voltage: averaged shunt-voltage measurement for each channel 
+  
+  Stored the same way as $read-shunt-voltage.  while the full-scale range = 32.76V (decimal
+  = 7FF8) LSB (BD0) = 8mV, the input range is only 26V, which must not be exceeded. 
+  */
   read-bus-voltage --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
-    raw-bus-voltage := reg_.read-i16-be (REGISTER-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2))
+    raw-bus-voltage := reg_.read-u16-be (REGISTER-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2))
     return  (raw-bus-voltage >> 3) * BUS-VOLTAGE-LSB_
 
+  /**
+  $read-shunt-current: averaged shunt current measurement for each channel 
+  */
   read-shunt-current --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
@@ -500,17 +699,71 @@ class Ina3221:
   read-power --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
-    return (read-bus-voltage --channel=channel) * (read-shunt-current --channel=channel)
+    bus-voltage := read-bus-voltage --channel=channel
+    shunt-current := read-shunt-current --channel=channel
+    if (bus-voltage == null) or (shunt-current == null): return null
+    return bus-voltage * shunt-current
 
   /**
   read-supply-voltage:
   
-  The INA3221 defines bus voltage as the voltage on the IN– pin to GND. The shunt voltage is IN+ – IN–. So the upstream supply at IN+ is: Vsupply@IN+ = Vbus(IN–→GND) + Vshunt(IN+−IN–).
+  The INA3221 defines bus voltage as the voltage on the IN– pin to GND. The shunt voltage
+  is IN+ – IN–. So the upstream supply at IN+ is: Vsupply@IN+ = Vbus(IN–→GND) + Vshunt(IN+−IN–).
   */
   read-supply-voltage --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
-    return (read-bus-voltage --channel=channel) * (read-shunt-voltage --channel=channel)
+    return (read-bus-voltage --channel=channel) + (read-shunt-voltage --channel=channel)
+
+  /** 
+  $read-shunt-summation:
+
+  The sum of the single conversion shunt voltages of the selected channels (enabled using summation 
+  control function. This register is updated with the most recent sum following each complete cycle
+  of all selected channels.
+  */
+  read-shunt-summation --voltage -> float:
+    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+      throw "read-shunt-summation: summation invalid where shunt resistors differ."
+    raw-counts := reg_.read-i16-be REGISTER-SHUNTVOLTAGE-SUM_
+    return (raw-counts >> 1) * SHUNT-VOLTAGE-LSB_
+
+  read-shunt-summation --current -> float:
+    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+      throw "read-shunt-summation: summation invalid where shunt resistors differ."
+    raw-counts := reg_.read-i16-be REGISTER-SHUNTVOLTAGE-SUM_
+    return (raw-counts >> 1) * current-LSB_[1]
+
+  /** 
+  $get-estimated-conversion-time-ms: estimate a worst-case maximum waiting time based on the configuration.
+  
+  Done this way to prevent setting a global maxWait type value, to then have it fail based
+  on times that are longer due to timing configurations.  Calculation also includes a 10% guard.
+  */
+  get-estimated-conversion-time-ms -> int:
+    // Read config and decode fields
+    mode/int                          := get-measure-mode
+    sampling-rate/int                 := get-sampling-rate-from-enum get-sampling-rate
+    bus-conversion-time/int           := get-conversion-time-us-from-enum get-bus-conversion-time
+    shunt-conversion-time/int         := get-conversion-time-us-from-enum get-shunt-conversion-time
+
+    time-contribution-us/int := 0
+    if (mode & 0b001) != 0:  time-contribution-us += shunt-conversion-time  // shunt enabled mask = 0b001
+    if (mode & 0b010) != 0:  time-contribution-us += bus-conversion-time    // bus enabled mask   = 0b010
+    //if (mode & 0b100) != 0:  time-contribution += bus-conversion-time     // continuous mask    = 0b100
+
+    // Essentially 3 profiles: Off, Triggered, and Continuous. BUS+/SHUNT voltage consumptions are not given
+    total-us/int    := time-contribution-us * sampling-rate * enabled-channel-count
+
+    // Add a small guard factor (~10%) to be conservative.
+    total-us = ((total-us * 11.0) / 10.0).round
+
+    // Return milliseconds, minimum 1 ms
+    total-ms := ((total-us + 999) / 1000)  // Ceiling.
+    if total-ms < 1: total-ms = 1
+
+    //logger_.debug "get-estimated-conversion-time-ms is: $(total-ms)ms"
+    return total-ms
 
   /**
   $get-conversion-time-us-from-enum: Returns microsecs for TIMING-x-US statics 0..7 (values as stored in the register).
@@ -541,39 +794,6 @@ class Ina3221:
     if code == AVERAGE-512-SAMPLES:  return 512
     if code == AVERAGE-1024-SAMPLES: return 1024
     return 1  // default/defensive - should never happen
-
-
-
-  /** 
-  $get-estimated-conversion-time-ms: estimate a worst-case maximum waiting time based on the configuration.
-  
-  Done this way to prevent setting a global maxWait type value, to then have it fail based
-  on times that are longer due to timing configurations.  Calculation also includes a 10% guard.
-  */
-  get-estimated-conversion-time-ms -> int:
-    // Read config and decode fields
-    mode/int                          := get-measure-mode
-    sampling-rate/int                 := get-sampling-rate-from-enum get-sampling-rate
-    bus-conversion-time/int           := get-conversion-time-us-from-enum get-bus-conversion-time
-    shunt-conversion-time/int         := get-conversion-time-us-from-enum get-shunt-conversion-time
-
-    time-contribution-us/int := 0
-    if (mode & 0b001) != 0:  time-contribution-us += shunt-conversion-time  // shunt enabled mask = 0b001
-    if (mode & 0b010) != 0:  time-contribution-us += bus-conversion-time    // bus enabled mask   = 0b010
-    //if (mode & 0b100) != 0:  time-contribution += bus-conversion-time     // continuous mask    = 0b100
-
-    // Essentially 3 profiles: Off, Triggered, and Continuous. BUS+/SHUNT voltage consumptions are not given
-    total-us/int    := time-contribution-us * sampling-rate * enabled-channel-count
-
-    // Add a small guard factor (~10%) to be conservative.
-    total-us = ((total-us * 11.0) / 10.0).to-int
-
-    // Return milliseconds, minimum 1 ms
-    total-ms := ((total-us + 999) / 1000).to-int  // Ceiling.
-    if total-ms < 1: total-ms = 1
-
-    //logger_.debug "get-estimated-conversion-time-ms is: $(total-ms)ms"
-    return total-ms
 
   /** 
   $read-register_: Given that register reads are largely similar, implemented here.
@@ -610,6 +830,31 @@ class Ina3221:
       new-value     |= (value << offset)
       reg_.write-u16-be register new-value
       //logger_.debug "write-register_: Register 0x$(%02x register) set from $(bits-16 old-value) to $(bits-16 new-value) $(note)"
+
+  /** 
+  $read-manufacturer-id: Get Manufacturer identifier.
+  
+  Useful if expanding driver to suit an additional sibling devices.
+  */
+  read-manufacturer-id -> int:
+    return reg_.read-u16-be REGISTER-MANUF-ID_
+  
+  /** 
+  $read-device-identification: returns integer of device ID bits from register.
+  
+  Bits 4-15 Stores the device identification bits.
+  */
+  read-device-identification -> int:
+    return read-register_ --register=REGISTER-DIE-ID_ --mask=DIE-ID-DID-MASK_ --offset=DIE-ID-DID-OFFSET_
+
+  /** 
+  $read-device-revision: Die Revision ID Bits.
+  
+  Bits 0-3 store the device revision number bits.
+  */
+  read-device-revision -> int:
+    return read-register_ --register=REGISTER-DIE-ID_ --mask=DIE-ID-RID-MASK_ --offset=0
+
 
   /** 
   $mask-offset: calculate mask offset instead of passing them around?
