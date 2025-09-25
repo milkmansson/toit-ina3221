@@ -82,7 +82,7 @@ main:
   scl            := gpio.Pin 25
   bus            := i2c.Bus --sda=sda --scl=scl --frequency=frequency
 
-  ina3221-device = bus.device 0x41 //Ina3221.I2C_ADDRESS
+  ina3221-device = bus.device Ina3221.I2C_ADDRESS
   ina3221-driver = Ina3221 ina3221-device
 
   test-result/string          := ""

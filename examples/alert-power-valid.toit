@@ -132,7 +132,7 @@ main:
     // 4. set PV limits so 3.3 V is inside the window → PV = valid
     ina3221-driver.set-valid-power-lower-limit VALID-TEST-LOWER-LIMIT
     ina3221-driver.set-valid-power-upper-limit VALID-TEST-UPPER-LIMIT
-    ina3221-driver.trigger-measurement --wait=true
+    sleep --ms=ina3221-driver.get-estimated-conversion-time-ms
     lower-limit      = ina3221-driver.get-valid-power-lower-limit
     upper-limit      = ina3221-driver.get-valid-power-upper-limit
     bus-voltage-v    = (ina3221-driver.read-bus-voltage --channel=device-channel)
@@ -145,7 +145,7 @@ main:
     // 5 set PV limits so 3.3 V is below the lower limit → PV = invalid
     ina3221-driver.set-valid-power-lower-limit INVALID-TEST-LOWER-LIMIT
     ina3221-driver.set-valid-power-upper-limit INVALID-TEST-UPPER-LIMIT
-    ina3221-driver.trigger-measurement --wait=true
+    sleep --ms=ina3221-driver.get-estimated-conversion-time-ms
     lower-limit = ina3221-driver.get-valid-power-lower-limit
     upper-limit = ina3221-driver.get-valid-power-upper-limit
     bus-voltage-v    = (ina3221-driver.read-bus-voltage --channel=device-channel)

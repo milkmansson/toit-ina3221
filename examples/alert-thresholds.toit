@@ -120,7 +120,7 @@ main:
     // Default values 
     ina3221-driver.set-warning-alert-threshold --current=default-warning-threshold --channel=device-channel
     ina3221-driver.set-critical-alert-threshold --current=default-critical-threshold --channel=device-channel
-    ina3221-driver.trigger-measurement --wait=true
+    sleep --ms=ina3221-driver.get-estimated-conversion-time-ms
     warning-threshold-read  = ina3221-driver.get-warning-alert-threshold --current --channel=device-channel
     critical-threshold-read = ina3221-driver.get-critical-alert-threshold --current --channel=device-channel
     current-current         = ina3221-driver.read-shunt-current --channel=device-channel
@@ -130,10 +130,11 @@ main:
     test-result             = "$((warning-result == "NORMAL") and (critical-result == "NORMAL") ? "SUCCESS" : "*** FAIL ***")"
     print "Current Alert actual=$(%0.4f current-current) w-limit=$(%0.4f warning-threshold-read) c-limit=$(%0.4f critical-threshold-read) $(result-info) \t[$(test-result)]"
     sleep --ms=1000
+
     // 4. set WARNING limits so current is above the limit - triggering warning alert
     ina3221-driver.set-warning-alert-threshold --current=TEST-WARNING-THRESHOLD --channel=device-channel
     ina3221-driver.set-critical-alert-threshold --current=default-critical-threshold --channel=device-channel
-    ina3221-driver.trigger-measurement --wait=true
+    sleep --ms=ina3221-driver.get-estimated-conversion-time-ms
     warning-threshold-read  = ina3221-driver.get-warning-alert-threshold --current --channel=device-channel
     critical-threshold-read = ina3221-driver.get-critical-alert-threshold --current --channel=device-channel
     current-current         = ina3221-driver.read-shunt-current --channel=device-channel
@@ -147,7 +148,7 @@ main:
     // 4. set CRITICAL limits so current is above the limit - triggering warning alert
     ina3221-driver.set-warning-alert-threshold --current=TEST-WARNING-THRESHOLD --channel=device-channel
     ina3221-driver.set-critical-alert-threshold --current=TEST-CRITICAL-THRESHOLD --channel=device-channel
-    ina3221-driver.trigger-measurement --wait=true
+    sleep --ms=ina3221-driver.get-estimated-conversion-time-ms
     warning-threshold-read  = ina3221-driver.get-warning-alert-threshold --current --channel=device-channel
     critical-threshold-read = ina3221-driver.get-critical-alert-threshold --current --channel=device-channel
     current-current         = ina3221-driver.read-shunt-current --channel=device-channel
