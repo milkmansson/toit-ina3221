@@ -337,6 +337,13 @@ class Ina3221:
     raw-read := reg_.read-u16-be (REGISTER-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2))
     return ((raw-read & 0xFFF8) >> 3) * SHUNT-VOLTAGE-LSB_
 
+  enable-critical-alert-latching -> none:
+    write-register_ --register=REGISTER-MASK-ENABLE_ --mask=CRITICAL-ALERT-LATCH-FLAG_ --offset=CRITICAL-ALERT-LATCH-OFFSET_ --value=1
+  
+  disable-critical-alert-latching -> none:
+    write-register_ --register=REGISTER-MASK-ENABLE_ --mask=CRITICAL-ALERT-LATCH-FLAG_ --offset=CRITICAL-ALERT-LATCH-OFFSET_ --value=0
+
+
   /**
   Set the Warning-Alert threshold  (in voltage or amps) for a specific channel.
 
@@ -369,6 +376,12 @@ class Ina3221:
     assert: 1 <= channel <= 3
     raw-read := reg_.read-u16-be (REGISTER-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2))
     return ((raw-read & 0xFFF8) >> 3) * SHUNT-VOLTAGE-LSB_
+
+  enable-warning-alert-latching -> none:
+    write-register_ --register=REGISTER-MASK-ENABLE_ --mask=WARNING-ALERT-LATCH-FLAG_ --offset=WARNING-ALERT-LATCH-OFFSET_ --value=1
+  
+  disable-warning-alert-latching -> none:
+    write-register_ --register=REGISTER-MASK-ENABLE_ --mask=WARNING-ALERT-LATCH-FLAG_ --offset=WARNING-ALERT-LATCH-OFFSET_ --value=0
 
 
   /** Valid power registers
@@ -502,7 +515,7 @@ class Ina3221:
   */
   timing-control-alert -> bool:
     value/int := read-register_ --register=REGISTER-MASK-ENABLE_ --mask=ALERT-TIMING-CONTROL-FLAG_ --offset=ALERT-TIMING-CONTROL-OFFSET_
-    return (value == 1)
+    return (value == 0)
 
   /**
   $power-invalid-alert: Power-valid-alert flag indicator. 
