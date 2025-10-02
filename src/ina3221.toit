@@ -31,26 +31,27 @@ class Ina3221:
   /**
   Default $I2C-ADDRESS is 64 (0x40) with jumper defaults.
 
-  Valid address values: 64 to 79 - See datasheet table 6-2
+  Valid address values: 64 to 79 - See datasheet table 6-2.
   */
   static I2C-ADDRESS                     ::= 0x40
 
-  /**
-  MODE constants to be used by users during configuration with set-measure-mode
-  */
-  static MODE-POWER-DOWN                        ::= 0b000       // Power-down
-  static MODE-SHUNT-TRIGGERED                   ::= 0b001       // Shunt voltage- triggered
-  static MODE-BUS-TRIGGERED                     ::= 0b010       // Bus voltage  - triggered
-  static MODE-SHUNT-BUS-TRIGGERED               ::= 0b011       // Shunt and bus- triggered
-  static MODE-POWER-DOWN2                       ::= 0b100       // Power-down (reserved mode)
-  static MODE-SHUNT-CONTINUOUS                  ::= 0b101       // Shunt voltage- continuous
-  static MODE-BUS-CONTINUOUS                    ::= 0b110       // Bus voltage  - continuous
-  static MODE-SHUNT-BUS-CONTINUOUS              ::= 0b111       // Shunt and bus- continuous
+  /** Sets 'Power down' mode when used with $set-measure-mode. */
+  static MODE-POWER-DOWN                        ::= 0b000
+  /** Sets 'Shunt voltage -triggered' mode when used with $set-measure-mode. */
+  static MODE-SHUNT-TRIGGERED                   ::= 0b001
+  /** Sets 'Bus voltage -triggered' mode when used with $set-measure-mode. */
+  static MODE-BUS-TRIGGERED                     ::= 0b010
+  /** Sets 'Shunt and bus -triggered' mode when used with $set-measure-mode. */
+  static MODE-SHUNT-BUS-TRIGGERED               ::= 0b011
+  /** Sets 'Power-down (reserved mode)' when used with $set-measure-mode. */
+  static MODE-POWER-DOWN2                       ::= 0b100
+  /** Sets 'Shunt voltage -continuous' mode when used with $set-measure-mode. */
+  static MODE-SHUNT-CONTINUOUS                  ::= 0b101
+  /** Sets 'Bus voltage -continuous' mode when used with $set-measure-mode. */
+  static MODE-BUS-CONTINUOUS                    ::= 0b110
+  /** Sets 'Shunt and bus -continuous' mode when used with $set-measure-mode. */
+  static MODE-SHUNT-BUS-CONTINUOUS              ::= 0b111
 
-  static SHUNT-FULL-SCALE-VOLTAGE-LIMIT_        ::= 0.16384   // volts.
-  static SHUNT-VOLTAGE-LSB_                     ::= 0.00004   // volts. 40 uV (per channel).
-  static BUS-VOLTAGE-LSB_                       ::= 0.008     // volts, 8 mV (per channel).
-  static POWER-VALID-LSB_                       ::= 0.008     // volts, 8 mV for upper and lower limits.
 
   /** Sampling option: (Default) - 1 sample = no averaging. */
   static AVERAGE-1-SAMPLE                      ::= 0x00
@@ -86,7 +87,13 @@ class Ina3221:
   /** Conversion time setting: 8.244ms */
   static TIMING-8300-US                        ::= 0x0007
 
+  /** LSBs used for converting register bits into actual values */
+  static SHUNT-FULL-SCALE-VOLTAGE-LIMIT_        ::= 0.16384   // volts.
+  static SHUNT-VOLTAGE-LSB_                     ::= 0.00004   // volts. 40 uV (per channel).
+  static BUS-VOLTAGE-LSB_                       ::= 0.008     // volts, 8 mV (per channel).
+  static POWER-VALID-LSB_                       ::= 0.008     // volts, 8 mV for upper and lower limits.
 
+  /** Register list */
   static REGISTER-CONFIGURATION_                ::= 0x00   //RW  // Configuration
   static REGISTER-SHUNT-VOLTAGE-CH1_            ::= 0x01   //R   // Shunt Voltage Channel 1
   static REGISTER-BUS-VOLTAGE-CH1_              ::= 0x02   //R   // Bus Voltage Channel 1
@@ -108,7 +115,7 @@ class Ina3221:
   static REGISTER-MANUF-ID_                     ::= 0xFE   //R   // Contains unique manufacturer identification number.
   static REGISTER-DIE-ID_                       ::= 0xFF   //R   // Contains unique die identification number
 
-  // Die & Manufacturer Info Masks
+  /** Die & Manufacturer Info Masks - for use with $REGISTER-DIE-ID_ register */
   static DIE-ID-RID-MASK_                      ::= 0b00000000_00001111
   static DIE-ID-DID-MASK_                      ::= 0b11111111_11110000
 
@@ -118,9 +125,7 @@ class Ina3221:
   // Similarly for Registers 0D and 0E, left justified by 1, (and signed)
   static SUMMATION-MASK_                        ::= 0b11111111_11111110
 
-  /**
-  Masks for use with $REGISTER-CONFIGURATION_ register.
-  */
+  /** Masks for use with $REGISTER-CONFIGURATION_ register. */
   static CONF-RESET-MASK_                       ::= 0b10000000_00000000
   static CONF-CH1-ENABLE-MASK_                  ::= 0b01000000_00000000
   static CONF-CH2-ENABLE-MASK_                  ::= 0b00100000_00000000
@@ -149,6 +154,8 @@ class Ina3221:
   static SUMMATION-CONTROL-CH2-FLAG_            ::= 0b00100000_00000000
   static SUMMATION-CONTROL-CH1-FLAG_            ::= 0b01000000_00000000
 
+  /** Several INA* devices use the same I2C ID.  This value for Device ID
+  identifies an actual INA3221. */
   static INA3221-DEVICE-ID_                     ::= 0x0322
 
   reg_/registers.Registers := ?
@@ -196,9 +203,10 @@ class Ina3221:
     trigger-measurement --wait
 
   /**
-  $reset_: Reset Device.
+  Resets Device.
 
-  Setting bit 16 resets the device.  Once directly set, the bit self-clears afterwards.
+  Setting bit 16 resets the device.  Once directly set, the bit self-clears
+  afterwards.
   */
   reset_ -> none:
     write-register_ REGISTER-CONFIGURATION_ 1 --mask=CONF-RESET-MASK_
