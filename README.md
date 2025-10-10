@@ -43,7 +43,7 @@ Use the following steps to get operational quickly:
 
 ### Comparison of Sibling Models
 Given their similarity, driver library for sibling models were written at the same time:
-| Model | [**INA219**](https://github.com/milkmansson/toit-ina219) (This driver) | [**INA226**](https://github.com/milkmansson/toit-ina226/) | [**INA3221**](https://github.com/milkmansson/toit-ina3221/) |
+| Model | [**INA219**](https://github.com/milkmansson/toit-ina219) | [**INA226**](https://github.com/milkmansson/toit-ina226/) | [**INA3221**](https://github.com/milkmansson/toit-ina3221/) (This driver)|
 | ---- | ---- | ---- | ---- |
 | **Channels** | 1 | 1 | 3 (independent but require a common GND and other wiring caveats, see Datasheet.) |
 | **Bus/common-mode range** | 0–26 v(bus/common-mode). Bus register full-scale can be configured at 16v or 32v, with caveats (BRNG). | 0–36v common-mode. Bus register full-scale 40.96v but cannot exceed 36v at pins. | 0–26v common-mode; bus register full scale to 32.76v, but input cannot exceed 26v. |
