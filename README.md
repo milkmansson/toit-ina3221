@@ -297,7 +297,7 @@ Many modules ship with 0.1 Ohm or 0.01 Ohm shunts.
 
 > [!IMPORTANT]
 > If the shunt is changed, always add a line to the beginning of the code to
-> set the shunt resistor value every boot.  The INA219 cannot detect it, and
+> set the shunt resistor value every boot.  The INA3221 cannot detect it, and
 > the driver does not store these values permanently.
 
 ### Shunt Resistor Values
