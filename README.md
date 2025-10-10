@@ -68,7 +68,7 @@ Originally, in measurement circuits, shunt resistors were used in analog
 ammeters.  A sensitive meter with sensitive needle movement could only handle
 very tiny current.  A low-value "shunt" resistor was therefore placed in
 parallel to bypass (or shunt) most of the current, so the meter only saw a safe
-fraction.  By calibrating the ratio, read large currents could be read with a
+fraction.  By calibrating the ratio, large currents could be read with a
 small meter.
 
 ### How it works
@@ -284,20 +284,23 @@ enabled channels).  This estimate is used as a maximum wait time for a
   - Depends on correct calibration.  (Calibration values are care of in this
     driver when setting `set-shunt-resistor`, and set to 0.100 Ohm by default).
 
-## What is not implemented?
-- **Timing Control**: The INA3221’s Timing-Control (TC) alert is very specific:
-  at power-up (or immediately after a software reset) it watches for CH1 bus to
-  reach 1.2 V, then checks to see that that CH2's bus also reaches ≥ 1.2 V,
-  within 28.6 ms (four complete conversion cycles at the default power-up
-  timing).  If CH2 misses that window, the TC pin alerts low, and the TCF flag
-  sets, recording the failure.  (Changing the Configuration register before the
-  sequence finishes essentially disables this feature for that boot.)  Currently
-  this driver is designed for typical current/power logging.  TC is a boot-only
-  check and is disabled if the Configuration is set too early.  The Power-Valid
-  window and Critical/Warning alerts are more generally useful during normal
-  operation.
+## Changing the Shunt Resistor
+Many modules ship with 0.1 Ohm or 0.01 Ohm shunts.
+- For high-current applications (tens of amps), the shunt can be replaced with a
+  much smaller value (e.g. 1–5 mOhm). This reduces voltage drop and wasted power,
+  and raises the maximum measurable current, but makes the resolution for tiny
+  currents coarser.
+- For low-current applications (milliamps), a larger shunt (e.g. 0.5–1.0 Ohm)
+  increases sensitivity and resolution, but lowers the maximum measurable
+  current (80 mA with a 1 Ohm shunt) and burns more power in the resistor
+  itself.
 
-## Shunt Resistor Values
+> [!IMPORTANT]
+> If the shunt is changed, always add a line to the beginning of the code to
+> set the shunt resistor value every boot.  The INA219 cannot detect it, and
+> the driver does not store these values permanently.
+
+### Shunt Resistor Values
 The following table illustrates consequences to current measurement with some
 sample shunt resistor values:
 
@@ -307,6 +310,19 @@ Shunt Resistor (SR) | Max Measurable Current | Shunt Resistor Wattage Requiremen
 0.100 Ohm (default) | 1.638 A | 0.268 W (use > .5 W) | 0.4 uA/bit | Common R100 resistor on modules; good for general range.
 0.050 Ohm | 3.2768 A | use > 1W | 0.8 mA/bit | Watch copper and heating.
 0.010 Ohm | 16.384 A | use 3-5 W | 4 mA/bit | High current, typically needs beefy external shunt.
+
+## Not implemented
+### Timing Control
+The INA3221’s Timing-Control (TC) alert is very specific feature: at power-up
+ (or immediately after a software reset) it watches for CH1 bus to reach 1.2 V,
+ then checks to see that that CH2's bus also reaches ≥ 1.2 V, within 28.6 ms
+ (four complete conversion cycles at the default power-up timing).  If CH2
+ misses that window, the TC pin alerts low, and the TCF flag sets, recording the
+ failure.  (Changing the Configuration register before the sequence finishes
+ essentially disables this feature for that boot.)  Currently this driver is
+ designed for typical current/power logging.  TC is a boot-only check and is
+ disabled if the Configuration is set too early.  The Power-Valid window and
+ Critical/Warning alerts are more generally useful during normal operation.
 
 ## Issues
 If there are any issues, changes, or any other kind of feedback, please
