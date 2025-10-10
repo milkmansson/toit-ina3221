@@ -14,7 +14,7 @@ A where a balance is required between Update Speed and Accuracy -
 eg in a Battery-Powered Scenario.  The INA3221 is used to monitor a node’s power draw
 to be able to estimate battery life.  The driver runs in continuous conversion mode by
 default, sampling all the time at relatively short conversion times.  This has a higher
-power requirement as the INA3221 is constantly awake and operating. In this case the 
+power requirement as the INA3221 is constantly awake and operating. In this case the
 driver needs to use triggered (single-shot) mode with longer conversion times and
 averaging enabled.
 */
@@ -44,35 +44,34 @@ main:
 
   // Set shunt resistor for concerned channel
   ina3221-driver.set-shunt-resistor 0.100 --channel=device-channel
-  
+
   // Read and display values every minute, but turn the device off in between
   10.repeat:
     // Three CONTINUOUS measurements, fluctuation expected
     ina3221-driver.set-measure-mode Ina3221.MODE-SHUNT-BUS-CONTINUOUS
-    ina3221-driver.set-power-on
     print "CONTINUOUS measurements, fluctuation usually expected"
     5.repeat:
       shunt-current-a  = (ina3221-driver.read-shunt-current --channel=device-channel)                    // a
       bus-voltage-v    = (ina3221-driver.read-bus-voltage --channel=device-channel)                      // v
       load-power-mw    = (ina3221-driver.read-power --channel=device-channel) * 1000.0                   // mw
-      print "      READ $(%02d it): $(%0.3f shunt-current-a)a  $(%0.4f bus-voltage-v)v  $(%0.1f load-power-mw)mw"
+      print "      READ $(%02d it + 1): $(%0.3f shunt-current-a)a  $(%0.4f bus-voltage-v)v  $(%0.1f load-power-mw)mw"
       sleep --ms=500
-    
+
     // CHANGE MODE - trigger a measurement and switch off
     ina3221-driver.set-measure-mode Ina3221.MODE-SHUNT-BUS-CONTINUOUS
 
     3.repeat:
-      ina3221-driver.set-power-on
+      ina3221-driver.set-measure-mode Ina3221.MODE-SHUNT-BUS-TRIGGERED
       ina3221-driver.trigger-measurement
-      ina3221-driver.set-power-off
+      ina3221-driver.set-measure-mode Ina3221.MODE-POWER-DOWN
       event = it
-      print " TRIGGER EVENT #$(%02d event) - Registers read 5 times (new set of values but no change between reads)"
+      print " TRIGGER EVENT #$(%02d event + 1) - Registers read 5 times (new set of values but no change between reads)"
 
       5.repeat:
         shunt-current-a  = (ina3221-driver.read-shunt-current --channel=device-channel)                    // a
         bus-voltage-v    = (ina3221-driver.read-bus-voltage --channel=device-channel)                      // v
         load-power-mw    = (ina3221-driver.read-power --channel=device-channel) * 1000.0                   // mw
-        print "  #$(%02d event) READ $(%02d it): $(%0.3f shunt-current-a)a  $(%0.4f bus-voltage-v)v  $(%0.1f load-power-mw)mw"
+        print "  #$(%02d event + 1) READ $(%02d it + 1): $(%0.3f shunt-current-a)a  $(%0.4f bus-voltage-v)v  $(%0.1f load-power-mw)mw"
         sleep --ms=500
 
     print "Waiting 30 seconds"

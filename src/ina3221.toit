@@ -10,14 +10,16 @@
 
 
 /**
-The INA3221 works a bit differently from the INA226: there is no register for calibration values, or
-the 0.00512/Current_LSB formula. The INA3221 only gives shunt voltage and bus voltage per channel;
-meaning the current (and power) are calculated in software.
+The INA3221 works a bit differently from the INA226: there is no register for
+calibration values, or the 0.00512/Current_LSB formula. The INA3221 only gives
+shunt voltage and bus voltage per channel; meaning the current (and power) are
+calculated in software.
 
 Key facts:
   - Shunt-voltage register LSB = 40 µV (per channel).
   - Bus-voltage register LSB = 8 mV (per channel).
-  - The data in both registers are left-justified (bits 14..3 hold data); right-shift by 3 to get the raw code.
+  - The data in both registers are left-justified (bits 14..3 hold data);
+  right-shift by 3 to get the raw code.
   - Shunt full-scale ≈ ±163.84 mV, so I(FS) = 0.16384/R(shunt) for each channel
 
 */
@@ -33,7 +35,7 @@ class Ina3221:
 
   Valid address values: 64 to 79 - See datasheet table 6-2.
   */
-  static I2C-ADDRESS                     ::= 0x40
+  static I2C-ADDRESS                            ::= 0x40
 
   /** Sets 'Power down' mode when used with $set-measure-mode. */
   static MODE-POWER-DOWN                        ::= 0b000
@@ -54,38 +56,38 @@ class Ina3221:
 
 
   /** Sampling option: (Default) - 1 sample = no averaging. */
-  static AVERAGE-1-SAMPLE                      ::= 0x00
+  static AVERAGE-1-SAMPLE                       ::= 0x00
   /** Sampling option: Values averaged over 4 samples. */
-  static AVERAGE-4-SAMPLES                     ::= 0x01
+  static AVERAGE-4-SAMPLES                      ::= 0x01
   /** Sampling option: Values averaged over 16 samples. */
-  static AVERAGE-16-SAMPLES                    ::= 0x02
+  static AVERAGE-16-SAMPLES                     ::= 0x02
   /** Sampling option: Values averaged over 64 samples. */
-  static AVERAGE-64-SAMPLES                    ::= 0x03
+  static AVERAGE-64-SAMPLES                     ::= 0x03
   /** Sampling option: Values averaged over 128 samples. */
-  static AVERAGE-128-SAMPLES                   ::= 0x04
+  static AVERAGE-128-SAMPLES                    ::= 0x04
   /** Sampling option: Values averaged over 256 samples. */
-  static AVERAGE-256-SAMPLES                   ::= 0x05
+  static AVERAGE-256-SAMPLES                    ::= 0x05
   /** Sampling option: Values averaged over 512 samples. */
-  static AVERAGE-512-SAMPLES                   ::= 0x06
+  static AVERAGE-512-SAMPLES                    ::= 0x06
   /** Sampling option: Values averaged over 1024 samples. */
-  static AVERAGE-1024-SAMPLES                  ::= 0x07
+  static AVERAGE-1024-SAMPLES                   ::= 0x07
 
   /** Conversion time setting: 140us */
-  static TIMING-140-US                         ::= 0x0000
+  static TIMING-140-US                          ::= 0x0000
   /** Conversion time setting: 204us */
-  static TIMING-204-US                         ::= 0x0001
+  static TIMING-204-US                          ::= 0x0001
   /** Conversion time setting: 332us */
-  static TIMING-332-US                         ::= 0x0002
+  static TIMING-332-US                          ::= 0x0002
   /** Conversion time setting: 588us */
-  static TIMING-588-US                         ::= 0x0003
+  static TIMING-588-US                          ::= 0x0003
   /** Conversion time setting: 1.1ms (Default) */
-  static TIMING-1100-US                        ::= 0x0004
+  static TIMING-1100-US                         ::= 0x0004
   /** Conversion time setting: 2.116ms */
-  static TIMING-2100-US                        ::= 0x0005
+  static TIMING-2100-US                         ::= 0x0005
   /** Conversion time setting: 4.156ms */
-  static TIMING-4200-US                        ::= 0x0006
+  static TIMING-4200-US                         ::= 0x0006
   /** Conversion time setting: 8.244ms */
-  static TIMING-8300-US                        ::= 0x0007
+  static TIMING-8300-US                         ::= 0x0007
 
   /** LSBs used for converting register bits into actual values */
   static SHUNT-FULL-SCALE-VOLTAGE-LIMIT_        ::= 0.16384   // volts.
@@ -116,8 +118,8 @@ class Ina3221:
   static REGISTER-DIE-ID_                       ::= 0xFF   //R   // Contains unique die identification number
 
   /** Die & Manufacturer Info Masks - for use with $REGISTER-DIE-ID_ register */
-  static DIE-ID-RID-MASK_                      ::= 0b00000000_00001111
-  static DIE-ID-DID-MASK_                      ::= 0b11111111_11110000
+  static DIE-ID-RID-MASK_                       ::= 0b00000000_00001111
+  static DIE-ID-DID-MASK_                       ::= 0b11111111_11110000
 
   // Alert limit values are 12 bit and left justified.  Registers 0x01-0x0C,0x10,0x11
   // Only 0x01-0x06,0x10,0x11 are signed, 0x07-0x0C are not. Using this mask:
@@ -380,7 +382,6 @@ class Ina3221:
     threshold-value/int := (voltage / SHUNT-VOLTAGE-LSB_).round
     threshold-value = clamp-value_ threshold-value --lower=0 --upper=4095
     write-register_ (REGISTER-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) threshold-value --mask=ALERT-LIMIT-MASK_
-    //logger_.info "set-warning-alert-threshold: volts=$(%0.3f voltage) [current: $(%0.3f get-warning-alert-threshold --current --channel=channel)]"
 
   /**
   Set the warning alert threshold (voltage based, in volts) for a specific channel.
@@ -459,7 +460,6 @@ class Ina3221:
       throw "set-summation-limit: summation invalid where shunt resistors differ."
     raw-value/int := (current / current-LSB_[1]).round << 1
     reg_.write-i16-be REGISTER-SHUNTVOLTAGE-SUM-LIMIT_ raw-value
-    //logger_.info "set-shunt-summation-limit: current=$(current) [volts: $(get-shunt-summation-limit --voltage)]"
 
   get-shunt-summation-limit --current -> float:
     if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
@@ -497,7 +497,7 @@ class Ina3221:
   wait-until-conversion-completed --max-wait-time-ms/int=(get-estimated-conversion-time-ms) -> none:
     current-wait-time-ms/int   := 0
     sleep-interval-ms/int := 50
-    while (not conversion-ready):
+    while (not is-conversion-ready):
       sleep --ms=sleep-interval-ms
       current-wait-time-ms += sleep-interval-ms
       if current-wait-time-ms >= max-wait-time-ms:
@@ -505,20 +505,21 @@ class Ina3221:
         break
 
   /**
-  Returns true if conversion is still ongoing. See README.md
+  Returns true if conversion is still ongoing. Reading this consumes it. See README.md
   */
-  conversion-ready -> bool:
+  is-conversion-ready -> bool:
     raw/int := read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-CONVERSION-READY-FLAG_
     return raw == 1
 
   /**
   $timing-control-alert
 
-  Timing-control-alert flag indicator. Use this bit to determine if the timing control (TC)
-  alert pin has been asserted through software rather than hardware. The bit setting
-  corresponds to the status of the TC pin. This bit does not clear after it has been
-  asserted unless the power is recycled or a software reset is issued. The default state
-  for the timing control alert flag is high
+  Timing-control-alert flag indicator. Use this bit to determine if the timing
+  control (TC) alert pin has been asserted through software rather than
+  hardware. The bit setting corresponds to the status of the TC pin. This bit
+  does not clear after it has been asserted unless the power is recycled or a
+  software reset is issued. The default state for the timing control alert flag
+  is high
   */
   timing-control-alert -> bool:
     value/int := read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-TIMING-CONTROL-FLAG_
@@ -527,14 +528,15 @@ class Ina3221:
   /**
   $power-invalid-alert: Power-valid-alert flag indicator.
 
-  This bit can be used to be able to determine if the
-  power valid (PV) alert pin has been asserted through software rather than hardware.
-  The bit setting corresponds to the status of the PV pin. This bit does not clear until the
+  This bit can be used to be able to determine if the power valid (PV) alert pin
+  has been asserted through software rather than hardware.  The bit setting
+  corresponds to the status of the PV pin. This bit does not clear until the
   condition that caused the alert is removed, and the PV pin has cleared.
 
-  The PV pin = high means “power valid,” low means “invalid.” The PVF bit in Mask/Enable
-  mirrors the PV status so firmware can read it. So printing “Valid-Power-Alert triggered”
-  when PVF=1 is a bit confusing—PVF=1 really means “rails are valid”.
+  The PV pin = high means “power valid,” low means “invalid.” The PVF bit in
+  Mask/Enable mirrors the PV status so firmware can read it. So printing
+  “Valid-Power-Alert triggered” when PVF=1 is a bit confusing—PVF=1 really means
+  “rails are valid”.
   */
   power-invalid-alert -> bool:
     value/int := read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-POWER-VALID-FLAG_
@@ -543,11 +545,10 @@ class Ina3221:
   /**
   $current-warning-alert: Warning-alert flag indicator.
 
-  These bits are asserted if the corresponding channel
-  averaged measurement has exceeded the warning alert limit, resulting in the Warning
-  alert pin being asserted. Read these bits to determine which channel caused the
-  warning alert. The Warning Alert Flag bits clear when the Mask/Enable register is read
-  back
+  These bits are asserted if the corresponding channel averaged measurement has
+  exceeded the warning alert limit, resulting in the Warning alert pin being
+  asserted. Read these bits to determine which channel caused the warning alert.
+  The Warning Alert Flag bits clear when the Mask/Enable register is read back
   */
   current-warning-alert --channel/int -> bool:
     assert: 1 <= channel <= 3
@@ -562,10 +563,10 @@ class Ina3221:
   /**
   $summation-alert: Summation-alert flag indicator.
 
-  This bit is asserted if the Shunt Voltage Sum register
-  exceeds the Shunt Voltage Sum Limit register. If the summation alert flag is asserted,
-  the Critical alert pin is also asserted. The Summation Alert Flag bit is cleared when the
-  Mask/Enable register is read back.
+  This bit is asserted if the Shunt Voltage Sum register exceeds the Shunt
+  Voltage Sum Limit register. If the summation alert flag is asserted, the
+  Critical alert pin is also asserted. The Summation Alert Flag bit is cleared
+  when the Mask/Enable register is read back.
   */
   summation-alert -> bool:
     value/int := read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-SUMMATION-FLAG_
@@ -574,10 +575,11 @@ class Ina3221:
   /**
   $critical-alert: Critical alert flag indicator.
 
-  Critical-alert flag indicator. These bits are asserted if the corresponding channel
-  measurement has exceeded the critical alert limit resulting in the Critical alert pin being
-  asserted. Read these bits to determine which channel caused the critical alert. The
-  critical alert flag bits are cleared when the Mask/Enable register is read back.
+  Critical-alert flag indicator. These bits are asserted if the corresponding
+  channel measurement has exceeded the critical alert limit resulting in the
+  Critical alert pin being asserted. Read these bits to determine which channel
+  caused the critical alert. The critical alert flag bits are cleared when the
+  Mask/Enable register is read back.
   */
   critical-alert --channel/int -> bool:
     assert: 1 <= channel <= 3
@@ -714,7 +716,6 @@ class Ina3221:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
     raw-shunt-counts := read-register_ (REGISTER-SHUNT-VOLTAGE-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_ --signed
-    //raw-shunt-voltage := reg_.read-i16-be (REGISTER-SHUNT-VOLTAGE-CH1_ + ((channel - 1) * 2))
     return  raw-shunt-counts * SHUNT-VOLTAGE-LSB_
 
   /**
@@ -723,7 +724,6 @@ class Ina3221:
   read-bus-voltage --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
-    //raw-bus-voltage := reg_.read-u16-be (REGISTER-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2))
     raw-bus-counts := read-register_ (REGISTER-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_ --signed
     return  raw-bus-counts * BUS-VOLTAGE-LSB_
 
@@ -733,7 +733,6 @@ class Ina3221:
   read-shunt-current --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
-    //raw-shunt-counts := reg_.read-i16-be (REGISTER-SHUNT-VOLTAGE-CH1_ + ((channel - 1) * 2))
     raw-shunt-counts := read-register_ (REGISTER-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_ --signed
     return raw-shunt-counts * current-LSB_[channel]
 
@@ -762,7 +761,6 @@ class Ina3221:
   read-shunt-summation --voltage -> float:
     if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
       throw "read-shunt-summation: summation invalid where shunt resistors differ."
-    //raw-counts := reg_.read-i16-be REGISTER-SHUNTVOLTAGE-SUM_
     raw-counts := read-register_ REGISTER-SHUNTVOLTAGE-SUM_ --mask=SUMMATION-MASK_ --signed
     return raw-counts * SHUNT-VOLTAGE-LSB_
 
@@ -772,12 +770,11 @@ class Ina3221:
   read-shunt-summation --current -> float:
     if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
       throw "read-shunt-summation: summation invalid where shunt resistors differ."
-    //raw-counts := reg_.read-i16-be REGISTER-SHUNTVOLTAGE-SUM_ --signed
     raw-counts := read-register_ REGISTER-SHUNTVOLTAGE-SUM_ --mask=SUMMATION-MASK_ --signed
     return raw-counts * current-LSB_[1]
 
   /**
-  $get-estimated-conversion-time-ms: estimate a worst-case maximum waiting time based on the configuration.
+  Estimates a worst-case maximum waiting time based on the configuration.
 
   Done this way to prevent setting a global maxWait type value, to then have it fail based
   on times that are longer due to timing configurations.  Calculation also includes a 10% guard.
@@ -808,7 +805,7 @@ class Ina3221:
     return total-ms
 
   /**
-  $get-conversion-time-us-from-enum: Returns microsecs for TIMING-x-US statics 0..7 (values as stored in the register).
+  Returns a us value for 'TIMING-*-US' statics.
   */
   get-conversion-time-us-from-enum code/int -> int:
     assert: 0 <= code <= 7
@@ -823,7 +820,7 @@ class Ina3221:
     return 1100  // default/defensive - should never happen
 
   /**
-  $get-sampling-rate-from-enum: Returns sample count for AVERAGE-x-SAMPLE statics 0..7 (values as stored in the register).
+  Returns actual number of samples count for 'AVERAGE-**-SAMPLE' statics.
   */
   get-sampling-rate-from-enum code/int -> int:
     assert: 0 <= code <= 7
@@ -841,8 +838,8 @@ class Ina3221:
   Reads the given register with the supplied mask.
 
   Given that register reads are largely similar, implemented here.  If the mask
-  is left at 0xFFFF (and offset remains at 0x0), it is a read from
-  the whole register.
+  is left at 0xFFFF (and offset remains at 0x0), it is a read from the whole
+  register.
   */
   read-register_
       register/int
@@ -908,8 +905,6 @@ class Ina3221:
 
   /**
   Returns chip die revision ID.
-
-  Bits 0-3 store the device revision number bits.
   */
   read-device-revision -> int:
     return read-register_ REGISTER-DIE-ID_ --mask=DIE-ID-RID-MASK_

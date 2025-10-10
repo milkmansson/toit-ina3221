@@ -1,5 +1,8 @@
 ## For more: https://github.com/github/gitignore
 
+## This Package - so I can keep reference material with source:
+.reference/
+
 ## Toit 
 .packages/
 .jaguar
