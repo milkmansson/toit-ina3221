@@ -90,75 +90,76 @@ class Ina3221:
   static TIMING-8300-US                         ::= 0x0007
 
   /** LSBs used for converting register bits into actual values */
-  static SHUNT-FULL-SCALE-VOLTAGE-LIMIT_        ::= 0.16384   // volts.
-  static SHUNT-VOLTAGE-LSB_                     ::= 0.00004   // volts. 40 uV (per channel).
-  static BUS-VOLTAGE-LSB_                       ::= 0.008     // volts, 8 mV (per channel).
-  static POWER-VALID-LSB_                       ::= 0.008     // volts, 8 mV for upper and lower limits.
+  static SHUNT-FULL-SCALE-VOLTAGE-LIMIT_ ::= 0.16384   // volts.
+  static SHUNT-VOLTAGE-LSB_              ::= 0.00004   // volts. 40 uV (per channel).
+  static BUS-VOLTAGE-LSB_                ::= 0.008     // volts, 8 mV (per channel).
+  static POWER-VALID-LSB_                ::= 0.008     // volts, 8 mV for upper and lower limits.
 
   /** Register list */
-  static REGISTER-CONFIGURATION_                ::= 0x00   //RW  // Configuration
-  static REGISTER-SHUNT-VOLTAGE-CH1_            ::= 0x01   //R   // Shunt Voltage Channel 1
-  static REGISTER-BUS-VOLTAGE-CH1_              ::= 0x02   //R   // Bus Voltage Channel 1
-  static REGISTER-SHUNT-VOLTAGE-CH2_            ::= 0x03   //R   // Shunt Voltage Channel 2
-  static REGISTER-BUS-VOLTAGE-CH2_              ::= 0x04   //R   // Bus Voltage Channel 2
-  static REGISTER-SHUNT-VOLTAGE-CH3_            ::= 0x05   //R   // Shunt Voltage Channel 3
-  static REGISTER-BUS-VOLTAGE-CH3_              ::= 0x06   //R   // Bus Voltage Channel 3
-  static REGISTER-CRITICAL-ALERT-LIMIT-CH1_     ::= 0x07   //RW  // Critical Alert Limit Channel 1
-  static REGISTER-WARNING-ALERT-LIMIT-CH1_      ::= 0x08   //RW  // Warning Alert Limit Channel 1
-  static REGISTER-CRITICAL-ALERT-LIMIT-CH2_     ::= 0x09   //RW  // Critical Alert Limit Channel 2
-  static REGISTER-WARNING-ALERT-LIMIT-CH2_      ::= 0x0A   //RW  // Warning Alert Limit Channel 2
-  static REGISTER-CRITICAL-ALERT-LIMIT-CH3_     ::= 0x0B   //RW  // Critical Alert Limit Channel 3
-  static REGISTER-WARNING-ALERT-LIMIT-CH3_      ::= 0x0C   //RW  // Warning Alert Limit Channel 3
-  static REGISTER-SHUNTVOLTAGE-SUM_             ::= 0x0D   //R   // Shunt Voltage Sum
-  static REGISTER-SHUNTVOLTAGE-SUM-LIMIT_       ::= 0x0E   //RW  // Shunt Voltage Sum Limit
-  static REGISTER-MASK-ENABLE_                  ::= 0x0F   //RW  // Mask/Enable
-  static REGISTER-POWERVALID-UPPER-LIMIT_       ::= 0x10   //RW  // Power-Valid Upper Limit
-  static REGISTER-POWERVALID-LOWER-LIMIT_       ::= 0x11   //RW  // Power-Valid Lower Limit
-  static REGISTER-MANUF-ID_                     ::= 0xFE   //R   // Contains unique manufacturer identification number.
-  static REGISTER-DIE-ID_                       ::= 0xFF   //R   // Contains unique die identification number
+  static REG-CONF_                     ::= 0x00   //RW  // Configuration
+  static REG-SHUNT-VOLTAGE-CH1_        ::= 0x01   //R   // Shunt Voltage Channel 1
+  static REG-BUS-VOLTAGE-CH1_          ::= 0x02   //R   // Bus Voltage Channel 1
+  static REG-SHUNT-VOLTAGE-CH2_        ::= 0x03   //R   // Shunt Voltage Channel 2
+  static REG-BUS-VOLTAGE-CH2_          ::= 0x04   //R   // Bus Voltage Channel 2
+  static REG-SHUNT-VOLTAGE-CH3_        ::= 0x05   //R   // Shunt Voltage Channel 3
+  static REG-BUS-VOLTAGE-CH3_          ::= 0x06   //R   // Bus Voltage Channel 3
+  static REG-CRITICAL-ALERT-LIMIT-CH1_ ::= 0x07   //RW  // Critical Alert Limit Channel 1
+  static REG-WARNING-ALERT-LIMIT-CH1_  ::= 0x08   //RW  // Warning Alert Limit Channel 1
+  static REG-CRITICAL-ALERT-LIMIT-CH2_ ::= 0x09   //RW  // Critical Alert Limit Channel 2
+  static REG-WARNING-ALERT-LIMIT-CH2_  ::= 0x0A   //RW  // Warning Alert Limit Channel 2
+  static REG-CRITICAL-ALERT-LIMIT-CH3_ ::= 0x0B   //RW  // Critical Alert Limit Channel 3
+  static REG-WARNING-ALERT-LIMIT-CH3_  ::= 0x0C   //RW  // Warning Alert Limit Channel 3
+  static REG-SHUNTVOLTAGE-SUM_         ::= 0x0D   //R   // Shunt Voltage Sum
+  static REG-SHUNTVOLTAGE-SUM-LIMIT_   ::= 0x0E   //RW  // Shunt Voltage Sum Limit
+  static REG-MASK-ENABLE_              ::= 0x0F   //RW  // Mask/Enable
+  static REG-POWERVALID-UPPER-LIMIT_   ::= 0x10   //RW  // Power-Valid Upper Limit
+  static REG-POWERVALID-LOWER-LIMIT_   ::= 0x11   //RW  // Power-Valid Lower Limit
+  static REG-MANUF-ID_                 ::= 0xFE   //R   // Contains unique manufacturer identification number.
+  static REG-DIE-ID_                   ::= 0xFF   //R   // Contains unique die identification number
 
-  /** Die & Manufacturer Info Masks - for use with $REGISTER-DIE-ID_ register */
-  static DIE-ID-RID-MASK_                       ::= 0b00000000_00001111
-  static DIE-ID-DID-MASK_                       ::= 0b11111111_11110000
+  /** Die & Manufacturer Info Masks - for use with $REG-DIE-ID_ register */
+  static DIE-ID-RID-MASK_  ::= 0b00000000_00001111
+  static DIE-ID-DID-MASK_  ::= 0b11111111_11110000
 
   // Alert limit values are 12 bit and left justified.  Registers 0x01-0x0C,0x10,0x11
   // Only 0x01-0x06,0x10,0x11 are signed, 0x07-0x0C are not. Using this mask:
-  static ALERT-LIMIT-MASK_                      ::= 0b11111111_11111000
-  // Similarly for Registers 0D and 0E, left justified by 1, (and signed)
-  static SUMMATION-MASK_                        ::= 0b11111111_11111110
+  static ALERT-LIMIT-MASK_ ::= 0b11111111_11111000
 
-  /** Masks for use with $REGISTER-CONFIGURATION_ register. */
-  static CONF-RESET-MASK_                       ::= 0b10000000_00000000
-  static CONF-CH1-ENABLE-MASK_                  ::= 0b01000000_00000000
-  static CONF-CH2-ENABLE-MASK_                  ::= 0b00100000_00000000
-  static CONF-CH3-ENABLE-MASK_                  ::= 0b00010000_00000000
-  static CONF-AVERAGE-MASK_                     ::= 0b00001110_00000000
-  static CONF-BUSVC-MASK_                       ::= 0b00000011_10000000
-  static CONF-SHUNTVC-MASK_                     ::= 0b00000000_00111000
-  static CONF-MODE-MASK_                        ::= 0b00000000_00000111
+  // Similarly for Registers 0D and 0E, left justified by 1, (and signed)
+  static SUMMATION-MASK_   ::= 0b11111111_11111110
+
+  /** Masks for use with $REG-CONF_ register. */
+  static CONF-RESET-MASK_      ::= 0b10000000_00000000
+  static CONF-CH1-ENABLE-MASK_ ::= 0b01000000_00000000
+  static CONF-CH2-ENABLE-MASK_ ::= 0b00100000_00000000
+  static CONF-CH3-ENABLE-MASK_ ::= 0b00010000_00000000
+  static CONF-AVERAGE-MASK_    ::= 0b00001110_00000000
+  static CONF-BUSVC-MASK_      ::= 0b00000011_10000000
+  static CONF-SHUNTVC-MASK_    ::= 0b00000000_00111000
+  static CONF-MODE-MASK_       ::= 0b00000000_00000111
 
   /**
-  Masks for use with $REGISTER-MASK-ENABLE_ register.
+  Masks for use with $REG-MASK-ENABLE_ register.
   */
-  static ALERT-CONVERSION-READY-FLAG_           ::= 0b00000000_00000001
-  static ALERT-TIMING-CONTROL-FLAG_             ::= 0b00000000_00000010
-  static ALERT-POWER-VALID-FLAG_                ::= 0b00000000_00000100
-  static ALERT-WARN-CH3-FLAG_                   ::= 0b00000000_00001000
-  static ALERT-WARN-CH2-FLAG_                   ::= 0b00000000_00010000
-  static ALERT-WARN-CH1-FLAG_                   ::= 0b00000000_00100000
-  static ALERT-SUMMATION-FLAG_                  ::= 0b00000000_01000000
-  static ALERT-CRITICAL-CH3-FLAG_               ::= 0b00000000_10000000
-  static ALERT-CRITICAL-CH2-FLAG_               ::= 0b00000001_00000000
-  static ALERT-CRITICAL-CH1-FLAG_               ::= 0b00000010_00000000
-  static CRITICAL-ALERT-LATCH-FLAG_             ::= 0b00000100_00000000
-  static WARNING-ALERT-LATCH-FLAG_              ::= 0b00001000_00000000
-  static SUMMATION-CONTROL-CH3-FLAG_            ::= 0b00010000_00000000
-  static SUMMATION-CONTROL-CH2-FLAG_            ::= 0b00100000_00000000
-  static SUMMATION-CONTROL-CH1-FLAG_            ::= 0b01000000_00000000
+  static ALERT-CONVERSION-READY-FLAG_ ::= 0b00000000_00000001
+  static ALERT-TIMING-CONTROL-FLAG_   ::= 0b00000000_00000010
+  static ALERT-POWER-VALID-FLAG_      ::= 0b00000000_00000100
+  static ALERT-WARN-CH3-FLAG_         ::= 0b00000000_00001000
+  static ALERT-WARN-CH2-FLAG_         ::= 0b00000000_00010000
+  static ALERT-WARN-CH1-FLAG_         ::= 0b00000000_00100000
+  static ALERT-SUMMATION-FLAG_        ::= 0b00000000_01000000
+  static ALERT-CRITICAL-CH3-FLAG_     ::= 0b00000000_10000000
+  static ALERT-CRITICAL-CH2-FLAG_     ::= 0b00000001_00000000
+  static ALERT-CRITICAL-CH1-FLAG_     ::= 0b00000010_00000000
+  static CRITICAL-ALERT-LATCH-FLAG_   ::= 0b00000100_00000000
+  static WARNING-ALERT-LATCH-FLAG_    ::= 0b00001000_00000000
+  static SUMMATION-CONTROL-CH3-FLAG_  ::= 0b00010000_00000000
+  static SUMMATION-CONTROL-CH2-FLAG_  ::= 0b00100000_00000000
+  static SUMMATION-CONTROL-CH1-FLAG_  ::= 0b01000000_00000000
 
   /** Several INA* devices use the same I2C ID.  This value for Device ID
   identifies an actual INA3221. */
-  static INA3221-DEVICE-ID_                     ::= 0x0322
+  static INA3221-DEVICE-ID_ ::= 0x0322
 
   reg_/registers.Registers := ?
   logger_/log.Logger := ?
@@ -211,7 +212,7 @@ class Ina3221:
   afterwards.
   */
   reset_ -> none:
-    write-register_ REGISTER-CONFIGURATION_ 1 --mask=CONF-RESET-MASK_
+    write-register_ REG-CONF_ 1 --mask=CONF-RESET-MASK_
 
   /**
   Set shunt resistor value for the specified channel.
@@ -226,13 +227,13 @@ class Ina3221:
   Sets measure mode.  Use one of the 'MODE-***' statics.
   */
   set-measure-mode mode/int -> none:
-    write-register_ REGISTER-CONFIGURATION_ mode --mask=CONF-MODE-MASK_
+    write-register_ REG-CONF_ mode --mask=CONF-MODE-MASK_
 
   /**
   Returns current measure mode.  Returns one of the 'MODE-***' statics.
   */
   get-measure-mode -> int:
-    return read-register_ REGISTER-CONFIGURATION_ --mask=CONF-MODE-MASK_
+    return read-register_ REG-CONF_ --mask=CONF-MODE-MASK_
 
   /**
   Sets device wide conversion-time, for bus only.
@@ -240,7 +241,7 @@ class Ina3221:
   Needs one of the 'TIMING-*-US' statics.
   */
   set-bus-conversion-time code/int -> none:
-    write-register_ REGISTER-CONFIGURATION_ code --mask=CONF-BUSVC-MASK_
+    write-register_ REG-CONF_ code --mask=CONF-BUSVC-MASK_
 
   /**
   Returns device wide conversion-time, for bus only.
@@ -248,7 +249,7 @@ class Ina3221:
   Returns one of the 'TIMING-*-US' statics.
   */
   get-bus-conversion-time -> int:
-    return read-register_ REGISTER-CONFIGURATION_ --mask=CONF-BUSVC-MASK_
+    return read-register_ REG-CONF_ --mask=CONF-BUSVC-MASK_
 
   /**
   Sets device wide conversion-time, for shunt only.
@@ -256,7 +257,7 @@ class Ina3221:
   Needs one of the 'TIMING-*-US' statics.
   */
   set-shunt-conversion-time code/int -> none:
-    write-register_ REGISTER-CONFIGURATION_ code --mask=CONF-SHUNTVC-MASK_
+    write-register_ REG-CONF_ code --mask=CONF-SHUNTVC-MASK_
 
   /**
   Returns device wide conversion-time, for shunt only.
@@ -264,19 +265,19 @@ class Ina3221:
   Returns one of the 'TIMING-*-US' statics.
   */
   get-shunt-conversion-time -> int:
-    return read-register_ REGISTER-CONFIGURATION_ --mask=CONF-SHUNTVC-MASK_
+    return read-register_ REG-CONF_ --mask=CONF-SHUNTVC-MASK_
 
   /**
   Sets device-wide sampling Rate for measurements.  See README.md
   */
   set-sampling-rate code/int -> none:
-    write-register_ REGISTER-CONFIGURATION_ code --mask=CONF-AVERAGE-MASK_
+    write-register_ REG-CONF_ code --mask=CONF-AVERAGE-MASK_
 
   /**
   Returns device-wide sampling Rate for measurements.  See README.md
   */
   get-sampling-rate -> int:
-    return read-register_ REGISTER-CONFIGURATION_ --mask=CONF-AVERAGE-MASK_
+    return read-register_ REG-CONF_ --mask=CONF-AVERAGE-MASK_
 
   /**
   Returns the current sampling rate (in samples, not the static).
@@ -288,25 +289,25 @@ class Ina3221:
   Enables critical alert latching.  See README.md.
   */
   enable-critical-alert-latching -> none:
-    write-register_ REGISTER-MASK-ENABLE_ 1 --mask=CRITICAL-ALERT-LATCH-FLAG_
+    write-register_ REG-MASK-ENABLE_ 1 --mask=CRITICAL-ALERT-LATCH-FLAG_
 
   /**
   Disables critical alert latching.  See README.md.
   */
   disable-critical-alert-latching -> none:
-    write-register_ REGISTER-MASK-ENABLE_ 0 --mask=CRITICAL-ALERT-LATCH-FLAG_
+    write-register_ REG-MASK-ENABLE_ 0 --mask=CRITICAL-ALERT-LATCH-FLAG_
 
   /**
   Enables warning alert latching.  See README.md.
   */
   enable-warning-alert-latching -> none:
-    write-register_ REGISTER-MASK-ENABLE_ 1 --mask=WARNING-ALERT-LATCH-FLAG_
+    write-register_ REG-MASK-ENABLE_ 1 --mask=WARNING-ALERT-LATCH-FLAG_
 
   /**
   Disables warning alert latching.  See README.md.
   */
   disable-warning-alert-latching -> none:
-    write-register_ REGISTER-MASK-ENABLE_ 0 --mask=WARNING-ALERT-LATCH-FLAG_
+    write-register_ REG-MASK-ENABLE_ 0 --mask=WARNING-ALERT-LATCH-FLAG_
 
   /**
   Set the critical alert threshold (current based, in amps) for a specific channel.
@@ -316,7 +317,7 @@ class Ina3221:
   set-critical-alert-threshold --current/float --channel/int -> none:
     assert: 1 <= channel <= 3
     threshold-value/int := (current / current-LSB_[channel]).round
-    write-register_ (REGISTER-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) threshold-value --mask=ALERT-LIMIT-MASK_
+    write-register_ (REG-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) threshold-value --mask=ALERT-LIMIT-MASK_
     //logger_.info "set-critical-alert-threshold: current=$(%0.3f current) [volts: $(%0.3f get-critical-alert-threshold --voltage --channel=channel)]"
 
   /**
@@ -326,7 +327,7 @@ class Ina3221:
   */
   get-critical-alert-threshold --current --channel/int -> float:
     assert: 1 <= channel <= 3
-    raw-read := read-register_ (REGISTER-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_
+    raw-read := read-register_ (REG-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_
     return raw-read * current-LSB_[channel]
 
   /**
@@ -337,7 +338,7 @@ class Ina3221:
   set-critical-alert-threshold --voltage/float --channel/int -> none:
     assert: 1 <= channel <= 3
     threshold-value/int := (voltage / SHUNT-VOLTAGE-LSB_).round << 3
-    write-register_ (REGISTER-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) threshold-value --mask=ALERT-LIMIT-MASK_
+    write-register_ (REG-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) threshold-value --mask=ALERT-LIMIT-MASK_
     //logger_.info "set-critical-alert-threshold: voltage=$(%0.3f voltage) [current: $(%0.3f get-critical-alert-threshold --current --channel=channel)]"
 
   /**
@@ -347,7 +348,7 @@ class Ina3221:
   */
   get-critical-alert-threshold --voltage --channel/int -> float:
     assert: 1 <= channel <= 3
-    raw-read := read-register_ (REGISTER-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_
+    raw-read := read-register_ (REG-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_
     return raw-read  * SHUNT-VOLTAGE-LSB_
 
   /**
@@ -360,7 +361,7 @@ class Ina3221:
     threshold-value/int := (current / current-LSB_[channel]).round
     if threshold-value > 4095: threshold-value = 4095
     if threshold-value < 0: threshold-value = 0
-    write-register_ (REGISTER-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) threshold-value --mask=ALERT-LIMIT-MASK_
+    write-register_ (REG-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) threshold-value --mask=ALERT-LIMIT-MASK_
 
   /**
   Get the warning alert threshold (current based, in amps) for a specific channel.
@@ -369,7 +370,7 @@ class Ina3221:
   */
   get-warning-alert-threshold --current --channel/int -> float:
     assert: 1 <= channel <= 3
-    raw-read := read-register_ (REGISTER-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_
+    raw-read := read-register_ (REG-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_
     return raw-read * current-LSB_[channel]
 
   /**
@@ -381,7 +382,7 @@ class Ina3221:
     assert: 1 <= channel <= 3
     threshold-value/int := (voltage / SHUNT-VOLTAGE-LSB_).round
     threshold-value = clamp-value_ threshold-value --lower=0 --upper=4095
-    write-register_ (REGISTER-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) threshold-value --mask=ALERT-LIMIT-MASK_
+    write-register_ (REG-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) threshold-value --mask=ALERT-LIMIT-MASK_
 
   /**
   Set the warning alert threshold (voltage based, in volts) for a specific channel.
@@ -390,7 +391,7 @@ class Ina3221:
   */
   get-warning-alert-threshold --voltage --channel/int -> float:
     assert: 1 <= channel <= 3
-    raw-read := read-register_ (REGISTER-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_
+    raw-read := read-register_ (REG-WARNING-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_
     return raw-read * SHUNT-VOLTAGE-LSB_
 
 
@@ -401,8 +402,8 @@ class Ina3221:
   */
   set-valid-power-upper-limit value/float -> none:
     raw-value := (value / POWER-VALID-LSB_).round
-    //reg_.write-i16-be REGISTER-POWERVALID-UPPER-LIMIT_ raw-value
-    write-register_ REGISTER-POWERVALID-UPPER-LIMIT_ raw-value --mask=ALERT-LIMIT-MASK_ --signed
+    //reg_.write-i16-be REG-POWERVALID-UPPER-LIMIT_ raw-value
+    write-register_ REG-POWERVALID-UPPER-LIMIT_ raw-value --mask=ALERT-LIMIT-MASK_ --signed
 
   /**
   Gets configured upper limit for 'valid power' range.
@@ -410,8 +411,8 @@ class Ina3221:
   Default value for upper limit is 2710h = 10.000V.  See 'Valid power' in README.md
   */
   get-valid-power-upper-limit -> float:
-    //raw-value := (reg_.read-i16-be REGISTER-POWERVALID-UPPER-LIMIT_) >> 3
-    raw-value := read-register_ REGISTER-POWERVALID-UPPER-LIMIT_ --mask=ALERT-LIMIT-MASK_ --signed
+    //raw-value := (reg_.read-i16-be REG-POWERVALID-UPPER-LIMIT_) >> 3
+    raw-value := read-register_ REG-POWERVALID-UPPER-LIMIT_ --mask=ALERT-LIMIT-MASK_ --signed
     return raw-value * POWER-VALID-LSB_
 
   /**
@@ -421,8 +422,8 @@ class Ina3221:
   */
   set-valid-power-lower-limit value/float -> none:
     raw-value := (value / POWER-VALID-LSB_).round << 3
-    //reg_.write-i16-be REGISTER-POWERVALID-LOWER-LIMIT_ raw-value
-    write-register_ REGISTER-POWERVALID-LOWER-LIMIT_ raw-value --mask=ALERT-LIMIT-MASK_ --signed
+    //reg_.write-i16-be REG-POWERVALID-LOWER-LIMIT_ raw-value
+    write-register_ REG-POWERVALID-LOWER-LIMIT_ raw-value --mask=ALERT-LIMIT-MASK_ --signed
 
   /**
   Sets configured lower limit for the valid power range.
@@ -430,8 +431,8 @@ class Ina3221:
   Default value for lower limit is 0x2328 = 9.0V. See README.md.
   */
   get-valid-power-lower-limit -> float:
-    // raw-value := (reg_.read-i16-be REGISTER-POWERVALID-LOWER-LIMIT_) >> 3
-    raw-value := read-register_ REGISTER-POWERVALID-UPPER-LIMIT_ --mask=ALERT-LIMIT-MASK_ --signed
+    // raw-value := (reg_.read-i16-be REG-POWERVALID-LOWER-LIMIT_) >> 3
+    raw-value := read-register_ REG-POWERVALID-UPPER-LIMIT_ --mask=ALERT-LIMIT-MASK_ --signed
     return raw-value * POWER-VALID-LSB_
 
   /**
@@ -446,25 +447,25 @@ class Ina3221:
     if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
       throw "set-summation-limit: summation invalid where shunt resistors differ."
     raw-value := (voltage / SHUNT-VOLTAGE-LSB_).round << 1
-    reg_.write-i16-be REGISTER-SHUNTVOLTAGE-SUM-LIMIT_ raw-value
+    reg_.write-i16-be REG-SHUNTVOLTAGE-SUM-LIMIT_ raw-value
     //logger_.info "set-shunt-summation-limit: voltage=$(voltage) [current: $(get-shunt-summation-limit --current)]"
 
   get-shunt-summation-limit --voltage -> float:
     if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
       throw "set-summation-limit: summation invalid where shunt resistors differ."
-    raw-counts := reg_.read-i16-be REGISTER-SHUNTVOLTAGE-SUM-LIMIT_
+    raw-counts := reg_.read-i16-be REG-SHUNTVOLTAGE-SUM-LIMIT_
     return (raw-counts >> 1) * SHUNT-VOLTAGE-LSB_
 
   set-shunt-summation-limit --current/float -> none:
     if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
       throw "set-summation-limit: summation invalid where shunt resistors differ."
     raw-value/int := (current / current-LSB_[1]).round << 1
-    reg_.write-i16-be REGISTER-SHUNTVOLTAGE-SUM-LIMIT_ raw-value
+    reg_.write-i16-be REG-SHUNTVOLTAGE-SUM-LIMIT_ raw-value
 
   get-shunt-summation-limit --current -> float:
     if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
       throw "set-summation-limit: summation invalid where shunt resistors differ."
-    raw-counts := reg_.read-i16-be REGISTER-SHUNTVOLTAGE-SUM-LIMIT_
+    raw-counts := reg_.read-i16-be REG-SHUNTVOLTAGE-SUM-LIMIT_
     return (raw-counts >> 1) * current-LSB_[1]
 
   /**
@@ -482,11 +483,11 @@ class Ina3221:
     if get-measure-mode == MODE-SHUNT-BUS-TRIGGERED: should-wait = true
 
     // Reading this mask clears the CNVR (Conversion Ready) Flag.
-    mask-register-value/int   := reg_.read-u16-be REGISTER-MASK-ENABLE_
+    mask-register-value/int   := reg_.read-u16-be REG-MASK-ENABLE_
 
     // Rewriting the mode bits starts a conversion.
-    raw := read-register_ REGISTER-CONFIGURATION_ --mask=CONF-MODE-MASK_
-    write-register_ REGISTER-MASK-ENABLE_ raw --mask=CONF-MODE-MASK_
+    raw := read-register_ REG-CONF_ --mask=CONF-MODE-MASK_
+    write-register_ REG-MASK-ENABLE_ raw --mask=CONF-MODE-MASK_
 
     // Wait if required. If in triggered mode, wait by default, respect switch.
     if should-wait or wait: wait-until-conversion-completed
@@ -508,7 +509,7 @@ class Ina3221:
   Returns true if conversion is still ongoing. Reading this consumes it. See README.md
   */
   is-conversion-ready -> bool:
-    raw/int := read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-CONVERSION-READY-FLAG_
+    raw/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-CONVERSION-READY-FLAG_
     return raw == 1
 
   /**
@@ -522,7 +523,7 @@ class Ina3221:
   is high
   */
   timing-control-alert -> bool:
-    value/int := read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-TIMING-CONTROL-FLAG_
+    value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-TIMING-CONTROL-FLAG_
     return (value == 0)
 
   /**
@@ -539,26 +540,25 @@ class Ina3221:
   “rails are valid”.
   */
   power-invalid-alert -> bool:
-    value/int := read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-POWER-VALID-FLAG_
+    value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-POWER-VALID-FLAG_
     return (value == 0)
 
   /**
-  $current-warning-alert: Warning-alert flag indicator.
+  $warning-alert-channel: Warning-alert flag indicator.
 
   These bits are asserted if the corresponding channel averaged measurement has
   exceeded the warning alert limit, resulting in the Warning alert pin being
   asserted. Read these bits to determine which channel caused the warning alert.
   The Warning Alert Flag bits clear when the Mask/Enable register is read back
   */
-  current-warning-alert --channel/int -> bool:
-    assert: 1 <= channel <= 3
-    if channel == 1:
-      return (read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-WARN-CH1-FLAG_) == 1
-    if channel == 2:
-      return (read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-WARN-CH2-FLAG_) == 1
-    if channel == 3:
-      return (read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-WARN-CH3-FLAG_) == 1
-    return false
+  warning-alert-channel -> int:
+    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-WARN-CH1-FLAG_) == 1:
+      return 1
+    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-WARN-CH2-FLAG_) == 1:
+      return 2
+    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-WARN-CH3-FLAG_) == 1:
+      return 3
+    return 0
 
   /**
   $summation-alert: Summation-alert flag indicator.
@@ -569,33 +569,32 @@ class Ina3221:
   when the Mask/Enable register is read back.
   */
   summation-alert -> bool:
-    value/int := read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-SUMMATION-FLAG_
+    value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-SUMMATION-FLAG_
     return value == 1
 
   /**
-  $critical-alert: Critical alert flag indicator.
+  $critical-alert-channel: Critical alert flag indicator.
 
-  Critical-alert flag indicator. These bits are asserted if the corresponding
+  Critical-alert-channel flag indicator. These bits are asserted if the corresponding
   channel measurement has exceeded the critical alert limit resulting in the
   Critical alert pin being asserted. Read these bits to determine which channel
   caused the critical alert. The critical alert flag bits are cleared when the
   Mask/Enable register is read back.
   */
-  critical-alert --channel/int -> bool:
-    assert: 1 <= channel <= 3
-    if channel == 1:
-      return (read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH1-FLAG_) == 1
-    if channel == 2:
-      return (read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH2-FLAG_) == 1
-    if channel == 3:
-      return (read-register_ REGISTER-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH3-FLAG_) == 1
-    return false
+  critical-alert-channel -> int:
+    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH1-FLAG_) == 1:
+      return 1
+    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH2-FLAG_) == 1:
+      return 2
+    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH3-FLAG_) == 1:
+      return 3
+    return 0
 
   /**
   Clears alerts flags.
   */
   clear-alert -> none:
-    register/int := read-register_ REGISTER-MASK-ENABLE_
+    register/int := read-register_ REG-MASK-ENABLE_
 
   /**
   Enables the specified channel.
@@ -603,11 +602,11 @@ class Ina3221:
   enable-channel --channel/int -> none:
     assert: 1 <= channel <= 3
     if channel == 1:
-      write-register_ REGISTER-CONFIGURATION_ 1 --mask=CONF-CH1-ENABLE-MASK_
+      write-register_ REG-CONF_ 1 --mask=CONF-CH1-ENABLE-MASK_
     else if channel == 2:
-      write-register_ REGISTER-CONFIGURATION_ 1 --mask=CONF-CH2-ENABLE-MASK_
+      write-register_ REG-CONF_ 1 --mask=CONF-CH2-ENABLE-MASK_
     else if channel == 3:
-      write-register_ REGISTER-CONFIGURATION_ 1 --mask=CONF-CH3-ENABLE-MASK_
+      write-register_ REG-CONF_ 1 --mask=CONF-CH3-ENABLE-MASK_
 
   /**
   Disables the specified channel.
@@ -615,20 +614,20 @@ class Ina3221:
   disable-channel --channel/int -> none:
     assert: 1 <= channel <= 3
     if channel == 1:
-      write-register_ REGISTER-CONFIGURATION_ 0 --mask=CONF-CH1-ENABLE-MASK_
+      write-register_ REG-CONF_ 0 --mask=CONF-CH1-ENABLE-MASK_
     else if channel == 2:
-      write-register_ REGISTER-CONFIGURATION_ 0 --mask=CONF-CH2-ENABLE-MASK_
+      write-register_ REG-CONF_ 0 --mask=CONF-CH2-ENABLE-MASK_
     else if channel == 3:
-      write-register_ REGISTER-CONFIGURATION_ 0 --mask=CONF-CH3-ENABLE-MASK_
+      write-register_ REG-CONF_ 0 --mask=CONF-CH3-ENABLE-MASK_
 
   /**
   Returns a count of the enamed channels.
   */
   enabled-channel-count -> int:
     out := 0
-    out += read-register_ REGISTER-CONFIGURATION_ --mask=CONF-CH1-ENABLE-MASK_
-    out += read-register_ REGISTER-CONFIGURATION_ --mask=CONF-CH2-ENABLE-MASK_
-    out += read-register_ REGISTER-CONFIGURATION_ --mask=CONF-CH3-ENABLE-MASK_
+    out += read-register_ REG-CONF_ --mask=CONF-CH1-ENABLE-MASK_
+    out += read-register_ REG-CONF_ --mask=CONF-CH2-ENABLE-MASK_
+    out += read-register_ REG-CONF_ --mask=CONF-CH3-ENABLE-MASK_
     return out
 
   /**
@@ -637,11 +636,11 @@ class Ina3221:
   channel-enabled --channel/int -> bool:
     assert: 1 <= channel <= 3
     if channel == 1:
-      return (read-register_ REGISTER-CONFIGURATION_ --mask=CONF-CH1-ENABLE-MASK_) == 1
+      return (read-register_ REG-CONF_ --mask=CONF-CH1-ENABLE-MASK_) == 1
     if channel == 2:
-      return (read-register_ REGISTER-CONFIGURATION_ --mask=CONF-CH2-ENABLE-MASK_) == 1
+      return (read-register_ REG-CONF_ --mask=CONF-CH2-ENABLE-MASK_) == 1
     if channel == 3:
-      return (read-register_ REGISTER-CONFIGURATION_ --mask=CONF-CH3-ENABLE-MASK_) == 1
+      return (read-register_ REG-CONF_ --mask=CONF-CH3-ENABLE-MASK_) == 1
     return false
 
   /**
@@ -650,11 +649,11 @@ class Ina3221:
   enable-summation --channel/int -> none:
     assert: 1 <= channel <= 3
     if channel == 1:
-      write-register_ REGISTER-MASK-ENABLE_ 1 --mask=SUMMATION-CONTROL-CH1-FLAG_
+      write-register_ REG-MASK-ENABLE_ 1 --mask=SUMMATION-CONTROL-CH1-FLAG_
     else if channel == 2:
-      write-register_ REGISTER-MASK-ENABLE_ 1 --mask=SUMMATION-CONTROL-CH2-FLAG_
+      write-register_ REG-MASK-ENABLE_ 1 --mask=SUMMATION-CONTROL-CH2-FLAG_
     else if channel == 3:
-      write-register_ REGISTER-MASK-ENABLE_ 1 --mask=SUMMATION-CONTROL-CH3-FLAG_
+      write-register_ REG-MASK-ENABLE_ 1 --mask=SUMMATION-CONTROL-CH3-FLAG_
 
   /**
   Disable summation for the specified channel.
@@ -662,11 +661,11 @@ class Ina3221:
   disable-summation --channel/int -> none:
     assert: 1 <= channel <= 3
     if channel == 1:
-      write-register_ REGISTER-MASK-ENABLE_ 0 --mask=SUMMATION-CONTROL-CH1-FLAG_
+      write-register_ REG-MASK-ENABLE_ 0 --mask=SUMMATION-CONTROL-CH1-FLAG_
     else if channel == 2:
-      write-register_ REGISTER-MASK-ENABLE_ 0 --mask=SUMMATION-CONTROL-CH2-FLAG_
+      write-register_ REG-MASK-ENABLE_ 0 --mask=SUMMATION-CONTROL-CH2-FLAG_
     else if channel == 3:
-      write-register_ REGISTER-MASK-ENABLE_ 0 --mask=SUMMATION-CONTROL-CH3-FLAG_
+      write-register_ REG-MASK-ENABLE_ 0 --mask=SUMMATION-CONTROL-CH3-FLAG_
 
 
 
@@ -702,11 +701,11 @@ class Ina3221:
   channel-summation-enabled --channel/int -> bool:
     assert: 1 <= channel <= 3
     if channel == 1:
-      return (read-register_ REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH1-FLAG_) == 1
+      return (read-register_ REG-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH1-FLAG_) == 1
     if channel == 2:
-      return (read-register_ REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH2-FLAG_) == 1
+      return (read-register_ REG-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH2-FLAG_) == 1
     if channel == 3:
-      return (read-register_ REGISTER-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH3-FLAG_) == 1
+      return (read-register_ REG-MASK-ENABLE_ --mask=SUMMATION-CONTROL-CH3-FLAG_) == 1
     return false
 
   /**
@@ -715,7 +714,7 @@ class Ina3221:
   read-shunt-voltage --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
-    raw-shunt-counts := read-register_ (REGISTER-SHUNT-VOLTAGE-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_ --signed
+    raw-shunt-counts := read-register_ (REG-SHUNT-VOLTAGE-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_ --signed
     return  raw-shunt-counts * SHUNT-VOLTAGE-LSB_
 
   /**
@@ -724,7 +723,7 @@ class Ina3221:
   read-bus-voltage --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
-    raw-bus-counts := read-register_ (REGISTER-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_ --signed
+    raw-bus-counts := read-register_ (REG-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_ --signed
     return  raw-bus-counts * BUS-VOLTAGE-LSB_
 
   /**
@@ -733,7 +732,7 @@ class Ina3221:
   read-shunt-current --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
-    raw-shunt-counts := read-register_ (REGISTER-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_ --signed
+    raw-shunt-counts := read-register_ (REG-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_ --signed
     return raw-shunt-counts * current-LSB_[channel]
 
   /**
@@ -761,7 +760,7 @@ class Ina3221:
   read-shunt-summation --voltage -> float:
     if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
       throw "read-shunt-summation: summation invalid where shunt resistors differ."
-    raw-counts := read-register_ REGISTER-SHUNTVOLTAGE-SUM_ --mask=SUMMATION-MASK_ --signed
+    raw-counts := read-register_ REG-SHUNTVOLTAGE-SUM_ --mask=SUMMATION-MASK_ --signed
     return raw-counts * SHUNT-VOLTAGE-LSB_
 
   /**
@@ -770,7 +769,7 @@ class Ina3221:
   read-shunt-summation --current -> float:
     if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
       throw "read-shunt-summation: summation invalid where shunt resistors differ."
-    raw-counts := read-register_ REGISTER-SHUNTVOLTAGE-SUM_ --mask=SUMMATION-MASK_ --signed
+    raw-counts := read-register_ REG-SHUNTVOLTAGE-SUM_ --mask=SUMMATION-MASK_ --signed
     return raw-counts * current-LSB_[1]
 
   /**
@@ -895,19 +894,19 @@ class Ina3221:
   Get Manufacturer ID.
   */
   read-manufacturer-id -> int:
-    return reg_.read-u16-be REGISTER-MANUF-ID_
+    return reg_.read-u16-be REG-MANUF-ID_
 
   /**
   Returns device ID.
   */
   read-device-identification -> int:
-    return read-register_ REGISTER-DIE-ID_ --mask=DIE-ID-DID-MASK_
+    return read-register_ REG-DIE-ID_ --mask=DIE-ID-DID-MASK_
 
   /**
   Returns chip die revision ID.
   */
   read-device-revision -> int:
-    return read-register_ REGISTER-DIE-ID_ --mask=DIE-ID-RID-MASK_
+    return read-register_ REG-DIE-ID_ --mask=DIE-ID-RID-MASK_
 
   /**
   Clamps the supplied value to specified limit.
