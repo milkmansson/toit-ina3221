@@ -46,9 +46,16 @@ Use the following steps to get operational quickly:
 > device it appears there are many who modify the device for different reasons.
 > I would strongly advise following your modules' guidance about wiring.
 
-This particular module looks pretty much the same to the untrained eye, pinout etc, but the silkscreen on the back shows something different on the lower right.
+This particular module looks pretty much the same to the untrained eye, pinout
+etc, but the silkscreen on the back shows something different on the lower
+right.
 
 ![Another version of the INA3221 module](images/ina3221-black.jpg)
+
+The same module, from the top.  Clearer silkscreens, better marking for the
+LED's.  I have also adjusted A0 to not collide with the other INA device used while testing.
+
+![Another version of the INA3221 module](images/ina3221-black-populated.jpg)
 
 ### Comparison of Sibling Models
 Given their similarity, driver library for sibling models were written at the same time:
