@@ -1,7 +1,9 @@
 # Toit Library for the TI INA3221 Triple-Channel Voltage/Current Monitor IC
 Toit driver for the INA3221: three channels of shunt + bus voltage monitoring
- with alerts. Unlike INA226, there is no calibration register— current is
- computed in software from Vshunt and shunt resistor values.
+ with alerts. Unlike INA226, there is no calibration register in this model.
+ Current is computed in software from Vshunt and shunt resistor values.
+
+![Front and back of one version of the INA3221 module](images/ina3221-pink.jpg)
 
 ## About the Device
 The INA3221 from Texas Instruments is a precision digital power monitor IC with
@@ -39,7 +41,14 @@ Use the following steps to get operational quickly:
 
 > [!WARNING]
 > There are two main variations of module both with different wiring
-> requirements (ADD PICTURES AND DESCRIBE)
+> requirements.  The silkscreen of the variant below shows different pin
+> layouts, as well as the channels reversed.  Trawling the internet about this
+> device it appears there are many who modify the device for different reasons.
+> I would strongly advise following your modules' guidance about wiring.
+
+This particular module looks pretty much the same to the untrained eye, pinout etc, but the silkscreen on the back shows something different on the lower right.
+
+![Another version of the INA3221 module](images/ina3221-black.jpg)
 
 ### Comparison of Sibling Models
 Given their similarity, driver library for sibling models were written at the same time:
