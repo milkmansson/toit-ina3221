@@ -342,7 +342,8 @@ The INA3221’s Timing-Control (TC) alert is very specific feature: at power-up
 
 ## Issues
 If there are any issues, changes, or any other kind of feedback, please
-[raise an issue](toit-ina3221/issues). Feedback is welcome and appreciated!
+[raise an issue](https://github.com/milkmansson/toit-ina3221/issues). Feedback
+is welcome and appreciated!
 
 ## Disclaimer
 - This driver has been written and tested with an unbranded INA226 module.
