@@ -1,4 +1,4 @@
 name: ina3221
-description: Support for I2C INA3221 3 channel current/voltage measuring IC.
+description: Support for the TI I2C INA3221 3 channel current/voltage measuring IC.
 environment:
   sdk: ^2.0.0-alpha.188
