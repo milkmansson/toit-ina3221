@@ -732,7 +732,7 @@ class Ina3221:
   read-shunt-current --channel/int -> float?:
     if (channel < 1) or (channel > 3) : return null
     if not channel-enabled --channel=channel: return null
-    raw-shunt-counts := read-register_ (REG-BUS-VOLTAGE-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_ --signed
+    raw-shunt-counts := read-register_ (REG-SHUNT-VOLTAGE-CH1_ + ((channel - 1) * 2)) --mask=ALERT-LIMIT-MASK_ --signed
     return raw-shunt-counts * current-LSB_[channel]
 
   /**
