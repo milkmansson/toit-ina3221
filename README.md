@@ -88,17 +88,17 @@ fraction.  By calibrating the ratio, large currents could be read with a
 small meter.
 
 ### How it works
-The INA219 measures current using a tiny precision resistor (referred to as the
+The device measures current using a tiny precision resistor (referred to as the
 shunt resistor), which is placed in series with the load.  When current flows
 through the shunt, a small voltage develops across it.  Because the resistance
 is very low (e.g., 0.1 Ohm), this voltage is only a few millivolts even at
-significant currents. The INA219’s ADC is designed to sense this tiny voltage
+significant currents. The device’s ADC is designed to sense this tiny voltage
 drop, precision in the microvolt range.  Ohm’s Law (V = I × R) is used to
 compute current.
 
 Simultaneously, the device monitors the bus voltage on the load side of the
 shunt. By combining the shunt voltage (for current) with the bus voltage (for
-supply level), the INA219 can also compute power consumption.  The INA219 stores
+supply level), the device can also compute power consumption.  The device stores
 these values in its registers which the driver retrieves using I2C.
 
 # Usage
@@ -111,7 +111,7 @@ MODE-POWER-DOWN` will turn the device off.
 
 ### Continuous Mode
 In continuous modes `MODE-BUS-CONTINUOUS`, `MODE-SHUNT-CONTINUOUS` and
-`MODE-SHUNT-BUS-CONTINUOUS` the INA219 loops forever:
+`MODE-SHUNT-BUS-CONTINUOUS` the device loops forever:
 - It repeatedly measures bus voltage and/or shunt voltage.
 - Each conversion result overwrites the previous one in the registers.
 - The sampling cadence is set using conversion times and averaging settings.
@@ -126,15 +126,15 @@ Use cases:
 ### Triggered Mode
 In triggered (single-shot) modes `MODE-SHUNT-TRIGGERED`, `MODE-BUS-TRIGGERED`,
 and `MODE-SHUNT-BUS-TRIGGERED`:
-- The INA219 sits idle until a measurement is explicitly triggered (by writing
+- The device sits idle until a measurement is explicitly triggered (by writing
   to the config register).
 - It performs exactly one set of conversions (bus + shunt, with averaging if
   configured).
 - Then it goes back to idle (low power).
 
 Use cases:
-- Low power consumption: e.g. wake up the INA219 once every few seconds/minutes,
-  take a measurement, then let both the INA219 and MCU sleep.
+- Low power consumption: e.g. wake up the device once every few seconds/minutes,
+  take a measurement, then let both the device and MCU sleep.
 - Synchronized measurement: e.g. where a measurement is necessary at the same
   time a load is toggled, eg, so the measurement can be triggered at the right
   time after.
@@ -142,7 +142,7 @@ Use cases:
   minimized.
 
 ### Power-Down
-INA219 can enter an ultra-low-power state. In this state, no measurements
+The device can enter an ultra-low-power state. In this state, no measurements
 happen.  Supply current drops to 0.5 uA typ (2uA max). Useful for ultra-low
 power systems where periodic measurement isn't needed. Use `set-measure-mode
 MODE-POWER-OFF` to shutdown.  Start again by setting the required measure mode
