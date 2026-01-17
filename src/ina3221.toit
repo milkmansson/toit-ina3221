@@ -439,9 +439,10 @@ class Ina3221:
   $set-shunt-summation-limit / $get-shunt-summation-limit:
 
   Sets limit for the voltage of the channels marked as involved in summation.
-  Both the per-channel 'Critical/Warning' limits and the 'Summation' limit
-  are programmed in the register in 'shunt voltage units' not actually in amps.
-  Warning compares the averaged shunt voltage (per AVG bits) and will assert accordingly.
+    Both the per-channel 'Critical/Warning' limits and the 'Summation' limit are
+    programmed in the register in 'shunt voltage units' not actually in amps.
+    Warning compares the averaged shunt voltage (per AVG bits) and will assert
+    accordingly.
   */
   set-shunt-summation-limit --voltage/float -> none:
     if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
@@ -506,7 +507,9 @@ class Ina3221:
         break
 
   /**
-  Returns true if conversion is still ongoing. Reading this consumes it. See README.md
+  Returns true if conversion is still ongoing.
+
+  Reading this consumes it. See README.md
   */
   is-conversion-ready -> bool:
     raw/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-CONVERSION-READY-FLAG_
@@ -516,11 +519,11 @@ class Ina3221:
   $timing-control-alert
 
   Timing-control-alert flag indicator. Use this bit to determine if the timing
-  control (TC) alert pin has been asserted through software rather than
-  hardware. The bit setting corresponds to the status of the TC pin. This bit
-  does not clear after it has been asserted unless the power is recycled or a
-  software reset is issued. The default state for the timing control alert flag
-  is high
+    control (TC) alert pin has been asserted through software rather than
+    hardware. The bit setting corresponds to the status of the TC pin. This bit
+    does not clear after it has been asserted unless the power is recycled or a
+    software reset is issued. The default state for the timing control alert
+    flag is high.
   */
   timing-control-alert -> bool:
     value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-TIMING-CONTROL-FLAG_
@@ -530,14 +533,14 @@ class Ina3221:
   $power-invalid-alert: Power-valid-alert flag indicator.
 
   This bit can be used to be able to determine if the power valid (PV) alert pin
-  has been asserted through software rather than hardware.  The bit setting
-  corresponds to the status of the PV pin. This bit does not clear until the
-  condition that caused the alert is removed, and the PV pin has cleared.
+    has been asserted through software rather than hardware.  The bit setting
+    corresponds to the status of the PV pin. This bit does not clear until the
+    condition that caused the alert is removed, and the PV pin has cleared.
 
   The PV pin = high means “power valid,” low means “invalid.” The PVF bit in
-  Mask/Enable mirrors the PV status so firmware can read it. So printing
-  “Valid-Power-Alert triggered” when PVF=1 is a bit confusing—PVF=1 really means
-  “rails are valid”.
+    Mask/Enable mirrors the PV status so firmware can read it. So printing
+    “Valid-Power-Alert triggered” when PVF=1 is a bit confusing—PVF=1 really
+    means “rails are valid”.
   */
   power-invalid-alert -> bool:
     value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-POWER-VALID-FLAG_
@@ -547,9 +550,10 @@ class Ina3221:
   $warning-alert-channel: Warning-alert flag indicator.
 
   These bits are asserted if the corresponding channel averaged measurement has
-  exceeded the warning alert limit, resulting in the Warning alert pin being
-  asserted. Read these bits to determine which channel caused the warning alert.
-  The Warning Alert Flag bits clear when the Mask/Enable register is read back
+    exceeded the warning alert limit, resulting in the Warning alert pin being
+    asserted. Read these bits to determine which channel caused the warning
+    alert.  The Warning Alert Flag bits clear when the Mask/Enable register is
+    read back.
   */
   warning-alert-channel -> int:
     if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-WARN-CH1-FLAG_) == 1:
@@ -564,9 +568,9 @@ class Ina3221:
   $summation-alert: Summation-alert flag indicator.
 
   This bit is asserted if the Shunt Voltage Sum register exceeds the Shunt
-  Voltage Sum Limit register. If the summation alert flag is asserted, the
-  Critical alert pin is also asserted. The Summation Alert Flag bit is cleared
-  when the Mask/Enable register is read back.
+    Voltage Sum Limit register. If the summation alert flag is asserted, the
+    Critical alert pin is also asserted. The Summation Alert Flag bit is cleared
+    when the Mask/Enable register is read back.
   */
   summation-alert -> bool:
     value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-SUMMATION-FLAG_
@@ -575,11 +579,11 @@ class Ina3221:
   /**
   $critical-alert-channel: Critical alert flag indicator.
 
-  Critical-alert-channel flag indicator. These bits are asserted if the corresponding
-  channel measurement has exceeded the critical alert limit resulting in the
-  Critical alert pin being asserted. Read these bits to determine which channel
-  caused the critical alert. The critical alert flag bits are cleared when the
-  Mask/Enable register is read back.
+  Critical-alert-channel flag indicator. These bits are asserted if the
+    corresponding channel measurement has exceeded the critical alert limit
+    resulting in the Critical alert pin being asserted. Read these bits to
+    determine which channel caused the critical alert. The critical alert flag
+    bits are cleared when the Mask/Enable register is read back.
   */
   critical-alert-channel -> int:
     if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH1-FLAG_) == 1:
@@ -669,32 +673,6 @@ class Ina3221:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   /**
   Returns true if the specified channel has summation enabled.
   */
@@ -775,8 +753,9 @@ class Ina3221:
   /**
   Estimates a worst-case maximum waiting time based on the configuration.
 
-  Done this way to prevent setting a global maxWait type value, to then have it fail based
-  on times that are longer due to timing configurations.  Calculation also includes a 10% guard.
+  Done this way to prevent setting a global maxWait type value, to then have it
+    fail based on times that are longer due to timing configurations.  Calculation
+    also includes a 10% guard.
   */
   get-estimated-conversion-time-ms -> int:
     // Read config and decode fields
@@ -840,12 +819,11 @@ class Ina3221:
   is left at 0xFFFF (and offset remains at 0x0), it is a read from the whole
   register.
   */
-  read-register_
+  read-register_ -> int
       register/int
       --mask/int=0xFFFF
       --offset/int=(mask.count-trailing-zeros)
-      --signed/bool=false
-      -> any:
+      --signed/bool=false:
     register-value/int := 0
     if signed:
       register-value = reg_.read-i16-be register
@@ -864,13 +842,12 @@ class Ina3221:
   is left at 0xFFFF (and offset remains at 0x0) it is a write to the whole
   register.
   */
-  write-register_
+  write-register_ -> none
       register/int
-      value/any
+      value/int
       --mask/int=0xFFFF
       --offset/int=(mask.count-trailing-zeros)
-      --signed/bool=false
-      -> none:
+      --signed/bool=false:
     // find allowed value range within field
     max/int := mask >> offset
     // check the value fits the field
@@ -878,9 +855,9 @@ class Ina3221:
 
     if (mask == 0xFFFF) and (offset == 0):
       if signed:
-        reg_.write-i16-be register (value & 0xFFFF)
+        reg_.write-i16-be register value
       else:
-        reg_.write-u16-be register (value & 0xFFFF)
+        reg_.write-u16-be register value
     else:
       new-value/int := reg_.read-u16-be register
       new-value     &= ~mask
@@ -915,23 +892,3 @@ class Ina3221:
     if upper != null: if value > upper:  return upper
     if lower != null: if value < lower:  return lower
     return value
-
-  /**
-  Displays bitmasks nicely for use when testing/troubleshooting.
-  */
-  bits-16_ x/int --min-display-bits/int=0 -> string:
-    if (x > 255) or (min-display-bits > 8):
-      out-string := "$(%b x)"
-      out-string = out-string.pad --left 16 '0'
-      out-string = "$(out-string[0..4]).$(out-string[4..8]).$(out-string[8..12]).$(out-string[12..16])"
-      return out-string
-    else if (x > 15) or (min-display-bits > 4):
-      out-string := "$(%b x)"
-      out-string = out-string.pad --left 8 '0'
-      out-string = "$(out-string[0..4]).$(out-string[4..8])"
-      return out-string
-    else:
-      out-string := "$(%b x)"
-      out-string = out-string.pad --left 4 '0'
-      out-string = "$(out-string[0..4])"
-      return out-string
