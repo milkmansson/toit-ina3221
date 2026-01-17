@@ -176,7 +176,7 @@ averaged value of each shunt-voltage channel is based on the number of averages
 set with `set-sampling-rate`.  (The average value updates each time there is a
 conversion on the corresponding channel.)  This also means if there are no
 conversions, the alert will not trip.  Use the feature with:
-```
+```Toit
 ina3221-driver.set-sampling-rate Ina226.AVERAGE-128-SAMPLES
 ina3221-driver.set-warning-alert-threshold --voltage=xxx --channel=<Channel #>
 // OR
@@ -186,7 +186,7 @@ Note that these two functions use the same register, the driver handles the math
 and sets the value in the register appropriately.  Setting either current or
 voltage clears the previous configuration.  If the pin alerts, determine which
 channel alerted using `warning-alert-channel`:
-```
+```Toit
 print "Critical alert triggere on channel: $(critical-alert-channel)"
 ```
 To configure latching for warning alerts, use `enable-warning-alert-latching`
@@ -197,7 +197,7 @@ Critical Alerts monitors **each individual conversion** of each shunt-voltage
 channel.  The feature compares these to the configured critical-alert limit for
 each channel and triggers if the limit is exceeded.  (If there are no
 conversions, the alert will not trip.) Use the feature with:
-```
+```Toit
 ina3221-driver.set-critical-alert-threshold --voltage=xxx --channel=<Channel #>
 // OR
 ina3221-driver.set-critical-alert-threshold --current=xxx --channel=<Channel #>
@@ -206,7 +206,7 @@ Note that these two functions use the same register, the driver handles the
 math and sets the value in the register appropriately.  Setting either current
 or voltage clears the previous configuration.  If the pin alerts, determine
 which channel alerted using `critical-alert-channel`:
-```
+```Toit
 print "Critical alert triggere on channel: $(critical-alert-channel)"
 ```
 To configure latching for critical alerts, use `enable-critical-alert-latching`
@@ -231,7 +231,7 @@ The sampling rate determines how often the device samples and averages the input
 | AVERAGE-1024-SAMPLES |  Values averaged over 1024 samples. |
 
 Use these by something like:
-```
+```Toit
 ina3221-driver.set-sampling-rate Ina226.AVERAGE-128-SAMPLES
 ```
 
