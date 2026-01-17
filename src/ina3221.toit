@@ -11,16 +11,15 @@
 
 /**
 The INA3221 works a bit differently from the INA226: there is no register for
-calibration values, or the 0.00512/Current_LSB formula. The INA3221 only gives
-shunt voltage and bus voltage per channel; meaning the current (and power) are
-calculated in software.
+  calibration values, or the 0.00512/Current_LSB formula. The INA3221 only gives
+  shunt voltage and bus voltage per channel; meaning the current (and power) are
+  calculated in software.
 
 Key facts:
-  - Shunt-voltage register LSB = 40 µV (per channel).
-  - Bus-voltage register LSB = 8 mV (per channel).
-  - The data in both registers are left-justified (bits 14..3 hold data);
-  right-shift by 3 to get the raw code.
-  - Shunt full-scale ≈ ±163.84 mV, so I(FS) = 0.16384/R(shunt) for each channel
+- Shunt-voltage register LSB = 40 µV (per channel).
+- Bus-voltage register LSB = 8 mV (per channel).
+- The data in both registers are left-justified (bits 14..3 hold data); right-shift by 3 to get the raw code.
+- Shunt full-scale ≈ ±163.84 mV, so I(FS) = 0.16384/R(shunt) for each channel
 
 */
 
@@ -209,7 +208,7 @@ class Ina3221:
   Resets Device.
 
   Setting bit 16 resets the device.  Once directly set, the bit self-clears
-  afterwards.
+    afterwards.
   */
   reset_ -> none:
     write-register_ REG-CONF_ 1 --mask=CONF-RESET-MASK_
@@ -754,8 +753,8 @@ class Ina3221:
   Estimates a worst-case maximum waiting time based on the configuration.
 
   Done this way to prevent setting a global maxWait type value, to then have it
-    fail based on times that are longer due to timing configurations.  Calculation
-    also includes a 10% guard.
+    fail based on times that are longer due to timing configurations.
+    Calculation also includes a 10% guard.
   */
   get-estimated-conversion-time-ms -> int:
     // Read config and decode fields
@@ -816,8 +815,8 @@ class Ina3221:
   Reads the given register with the supplied mask.
 
   Given that register reads are largely similar, implemented here.  If the mask
-  is left at 0xFFFF (and offset remains at 0x0), it is a read from the whole
-  register.
+    is left at 0xFFFF (and offset remains at 0x0), it is a read from the whole
+    register.
   */
   read-register_ -> int
       register/int
@@ -839,8 +838,8 @@ class Ina3221:
   Writes the given register with the supplied mask.
 
   Given that register reads are largely similar, implemented here.  If the mask
-  is left at 0xFFFF (and offset remains at 0x0) it is a write to the whole
-  register.
+    is left at 0xFFFF (and offset remains at 0x0) it is a write to the whole
+    register.
   */
   write-register_ -> none
       register/int
