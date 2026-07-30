@@ -170,7 +170,6 @@ class Ina3221:
       dev/serial.Device
       --logger/log.Logger=log.default:
     logger_ = logger.with-name "ina3221"
-    logger_ = logger
     reg_ = dev.registers
 
     dev-id := read-device-identification
@@ -179,7 +178,7 @@ class Ina3221:
 
     if (dev-id != INA3221-DEVICE-ID_):
       logger_.error "Device is NOT an INA3221" --tags={ "expected-id" : INA3221-DEVICE-ID_, "received-id": dev-id }
-      throw "Device is not an INA226. Expected 0x$(%04x INA3221-DEVICE-ID_) got 0x$(%04x dev-id)"
+      throw "Device is not an INA3221. Expected 0x$(%04x INA3221-DEVICE-ID_) got 0x$(%04x dev-id)"
 
     initialize-device_
 
@@ -207,7 +206,7 @@ class Ina3221:
   /**
   Resets Device.
 
-  Setting bit 16 resets the device.  Once directly set, the bit self-clears
+  Setting bit 15 resets the device.  Once directly set, the bit self-clears
     afterwards.
   */
   reset_ -> none:
@@ -336,7 +335,8 @@ class Ina3221:
   */
   set-critical-alert-threshold --voltage/float --channel/int -> none:
     assert: 1 <= channel <= 3
-    threshold-value/int := (voltage / SHUNT-VOLTAGE-LSB_).round << 3
+    threshold-value/int := (voltage / SHUNT-VOLTAGE-LSB_).round
+    threshold-value = clamp-value_ threshold-value --lower=0 --upper=4095
     write-register_ (REG-CRITICAL-ALERT-LIMIT-CH1_ + ((channel - 1) * 2)) threshold-value --mask=ALERT-LIMIT-MASK_
     //logger_.info "set-critical-alert-threshold: voltage=$(%0.3f voltage) [current: $(%0.3f get-critical-alert-threshold --current --channel=channel)]"
 
@@ -353,7 +353,7 @@ class Ina3221:
   /**
   Set the warning alert threshold (current based, in amps) for a specific channel.
 
-  'Warning' alerts     .  See README.md.
+  'Warning' alerts compare the averaged shunt voltage (per AVG bits) against the limit.  See README.md.
   */
   set-warning-alert-threshold --current/float --channel/int -> none:
     assert: 1 <= channel <= 3
@@ -365,7 +365,7 @@ class Ina3221:
   /**
   Get the warning alert threshold (current based, in amps) for a specific channel.
 
-  'Warning' alerts     .  See README.md.
+  'Warning' alerts compare the averaged shunt voltage (per AVG bits) against the limit.  See README.md.
   */
   get-warning-alert-threshold --current --channel/int -> float:
     assert: 1 <= channel <= 3
@@ -375,7 +375,7 @@ class Ina3221:
   /**
   Set the warning alert threshold (voltage based, in volts) for a specific channel.
 
-  'Warning' alerts     .  See README.md.
+  'Warning' alerts compare the averaged shunt voltage (per AVG bits) against the limit.  See README.md.
   */
   set-warning-alert-threshold --voltage/float --channel/int -> none:
     assert: 1 <= channel <= 3
@@ -386,7 +386,7 @@ class Ina3221:
   /**
   Set the warning alert threshold (voltage based, in volts) for a specific channel.
 
-  'Warning' alerts     .  See README.md.
+  'Warning' alerts compare the averaged shunt voltage (per AVG bits) against the limit.  See README.md.
   */
   get-warning-alert-threshold --voltage --channel/int -> float:
     assert: 1 <= channel <= 3
@@ -420,18 +420,18 @@ class Ina3221:
   Default value for lower limit is 0x2328 = 9.0V. See README.md.
   */
   set-valid-power-lower-limit value/float -> none:
-    raw-value := (value / POWER-VALID-LSB_).round << 3
+    raw-value := (value / POWER-VALID-LSB_).round
     //reg_.write-i16-be REG-POWERVALID-LOWER-LIMIT_ raw-value
     write-register_ REG-POWERVALID-LOWER-LIMIT_ raw-value --mask=ALERT-LIMIT-MASK_ --signed
 
   /**
-  Sets configured lower limit for the valid power range.
+  Returns the configured lower limit for the valid power range.
 
   Default value for lower limit is 0x2328 = 9.0V. See README.md.
   */
   get-valid-power-lower-limit -> float:
     // raw-value := (reg_.read-i16-be REG-POWERVALID-LOWER-LIMIT_) >> 3
-    raw-value := read-register_ REG-POWERVALID-UPPER-LIMIT_ --mask=ALERT-LIMIT-MASK_ --signed
+    raw-value := read-register_ REG-POWERVALID-LOWER-LIMIT_ --mask=ALERT-LIMIT-MASK_ --signed
     return raw-value * POWER-VALID-LSB_
 
   /**
@@ -444,26 +444,26 @@ class Ina3221:
     accordingly.
   */
   set-shunt-summation-limit --voltage/float -> none:
-    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+    if not (current-LSB_.values.every: it == current-LSB_.values.first):
       throw "set-summation-limit: summation invalid where shunt resistors differ."
     raw-value := (voltage / SHUNT-VOLTAGE-LSB_).round << 1
     reg_.write-i16-be REG-SHUNTVOLTAGE-SUM-LIMIT_ raw-value
     //logger_.info "set-shunt-summation-limit: voltage=$(voltage) [current: $(get-shunt-summation-limit --current)]"
 
   get-shunt-summation-limit --voltage -> float:
-    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+    if not (current-LSB_.values.every: it == current-LSB_.values.first):
       throw "set-summation-limit: summation invalid where shunt resistors differ."
     raw-counts := reg_.read-i16-be REG-SHUNTVOLTAGE-SUM-LIMIT_
     return (raw-counts >> 1) * SHUNT-VOLTAGE-LSB_
 
   set-shunt-summation-limit --current/float -> none:
-    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+    if not (current-LSB_.values.every: it == current-LSB_.values.first):
       throw "set-summation-limit: summation invalid where shunt resistors differ."
     raw-value/int := (current / current-LSB_[1]).round << 1
     reg_.write-i16-be REG-SHUNTVOLTAGE-SUM-LIMIT_ raw-value
 
   get-shunt-summation-limit --current -> float:
-    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+    if not (current-LSB_.values.every: it == current-LSB_.values.first):
       throw "set-summation-limit: summation invalid where shunt resistors differ."
     raw-counts := reg_.read-i16-be REG-SHUNTVOLTAGE-SUM-LIMIT_
     return (raw-counts >> 1) * current-LSB_[1]
@@ -487,7 +487,7 @@ class Ina3221:
 
     // Rewriting the mode bits starts a conversion.
     raw := read-register_ REG-CONF_ --mask=CONF-MODE-MASK_
-    write-register_ REG-MASK-ENABLE_ raw --mask=CONF-MODE-MASK_
+    write-register_ REG-CONF_ raw --mask=CONF-MODE-MASK_
 
     // Wait if required. If in triggered mode, wait by default, respect switch.
     if should-wait or wait: wait-until-conversion-completed
@@ -509,10 +509,13 @@ class Ina3221:
   Returns true if conversion is still ongoing.
 
   Reading this consumes it. See README.md
+
+  If $raw is given, decodes the flag from that value instead of performing a
+    new I2C read; see $read-alert-status.
   */
-  is-conversion-ready -> bool:
-    raw/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-CONVERSION-READY-FLAG_
-    return raw == 1
+  is-conversion-ready --raw/int?=null -> bool:
+    value/int := raw != null ? raw : read-mask-enable-raw_
+    return (value & ALERT-CONVERSION-READY-FLAG_) != 0
 
   /**
   $timing-control-alert
@@ -523,10 +526,13 @@ class Ina3221:
     does not clear after it has been asserted unless the power is recycled or a
     software reset is issued. The default state for the timing control alert
     flag is high.
+
+  If $raw is given, decodes the flag from that value instead of performing a
+    new I2C read; see $read-alert-status.
   */
-  timing-control-alert -> bool:
-    value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-TIMING-CONTROL-FLAG_
-    return (value == 0)
+  timing-control-alert --raw/int?=null -> bool:
+    value/int := raw != null ? raw : read-mask-enable-raw_
+    return (value & ALERT-TIMING-CONTROL-FLAG_) == 0
 
   /**
   $power-invalid-alert: Power-valid-alert flag indicator.
@@ -540,10 +546,13 @@ class Ina3221:
     Mask/Enable mirrors the PV status so firmware can read it. So printing
     “Valid-Power-Alert triggered” when PVF=1 is a bit confusing—PVF=1 really
     means “rails are valid”.
+
+  If $raw is given, decodes the flag from that value instead of performing a
+    new I2C read; see $read-alert-status.
   */
-  power-invalid-alert -> bool:
-    value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-POWER-VALID-FLAG_
-    return (value == 0)
+  power-invalid-alert --raw/int?=null -> bool:
+    value/int := raw != null ? raw : read-mask-enable-raw_
+    return (value & ALERT-POWER-VALID-FLAG_) == 0
 
   /**
   $warning-alert-channel: Warning-alert flag indicator.
@@ -553,14 +562,19 @@ class Ina3221:
     asserted. Read these bits to determine which channel caused the warning
     alert.  The Warning Alert Flag bits clear when the Mask/Enable register is
     read back.
+
+  If $raw is given, decodes the flags from that value instead of performing a
+    new I2C read. Otherwise this performs its own read, which clears the
+    Warning, Critical, and Summation flags - use $read-alert-status instead of
+    calling this together with $critical-alert-channel or $summation-alert
+    separately, or a flag set by one call can be lost before the next call
+    reads it.
   */
-  warning-alert-channel -> int:
-    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-WARN-CH1-FLAG_) == 1:
-      return 1
-    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-WARN-CH2-FLAG_) == 1:
-      return 2
-    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-WARN-CH3-FLAG_) == 1:
-      return 3
+  warning-alert-channel --raw/int?=null -> int:
+    register/int := raw != null ? raw : read-mask-enable-raw_
+    if (register & ALERT-WARN-CH1-FLAG_) != 0: return 1
+    if (register & ALERT-WARN-CH2-FLAG_) != 0: return 2
+    if (register & ALERT-WARN-CH3-FLAG_) != 0: return 3
     return 0
 
   /**
@@ -570,10 +584,13 @@ class Ina3221:
     Voltage Sum Limit register. If the summation alert flag is asserted, the
     Critical alert pin is also asserted. The Summation Alert Flag bit is cleared
     when the Mask/Enable register is read back.
+
+  If $raw is given, decodes the flag from that value instead of performing a
+    new I2C read; see $read-alert-status.
   */
-  summation-alert -> bool:
-    value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-SUMMATION-FLAG_
-    return value == 1
+  summation-alert --raw/int?=null -> bool:
+    value/int := raw != null ? raw : read-mask-enable-raw_
+    return (value & ALERT-SUMMATION-FLAG_) != 0
 
   /**
   $critical-alert-channel: Critical alert flag indicator.
@@ -583,21 +600,67 @@ class Ina3221:
     resulting in the Critical alert pin being asserted. Read these bits to
     determine which channel caused the critical alert. The critical alert flag
     bits are cleared when the Mask/Enable register is read back.
+
+  If $raw is given, decodes the flags from that value instead of performing a
+    new I2C read. Otherwise this performs its own read, which clears the
+    Warning, Critical, and Summation flags - use $read-alert-status instead of
+    calling this together with $warning-alert-channel or $summation-alert
+    separately, or a flag set by one call can be lost before the next call
+    reads it.
   */
-  critical-alert-channel -> int:
-    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH1-FLAG_) == 1:
-      return 1
-    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH2-FLAG_) == 1:
-      return 2
-    if (read-register_ REG-MASK-ENABLE_ --mask=ALERT-CRITICAL-CH3-FLAG_) == 1:
-      return 3
+  critical-alert-channel --raw/int?=null -> int:
+    register/int := raw != null ? raw : read-mask-enable-raw_
+    if (register & ALERT-CRITICAL-CH1-FLAG_) != 0: return 1
+    if (register & ALERT-CRITICAL-CH2-FLAG_) != 0: return 2
+    if (register & ALERT-CRITICAL-CH3-FLAG_) != 0: return 3
     return 0
 
   /**
-  Clears alerts flags.
+  Clears alert flags.
+
+  Reading $REG-MASK-ENABLE_ clears the latched Warning, Critical, and
+    Summation alert flags.
   */
   clear-alert -> none:
-    register/int := read-register_ REG-MASK-ENABLE_
+    read-mask-enable-raw_
+
+  /**
+  Reads all alert and status flags with a single I2C transaction.
+
+  Returns a map with keys "conversion-ready", "timing-control",
+    "power-invalid", "warning-channel", "critical-channel", and "summation",
+    decoded from one read of $REG-MASK-ENABLE_.
+
+  Prefer this over calling $is-conversion-ready, $power-invalid-alert,
+    $warning-alert-channel, $critical-alert-channel, and $summation-alert
+    separately when more than one flag is needed at once: each of those,
+    called without --raw, performs its own I2C read, and since reading
+    $REG-MASK-ENABLE_ clears the Warning, Critical, and Summation latches, a
+    later call could silently miss a flag an earlier call's read already
+    cleared.
+  */
+  read-alert-status -> Map:
+    raw := read-mask-enable-raw_
+    return {
+      "conversion-ready" : is-conversion-ready --raw=raw,
+      "timing-control"   : timing-control-alert --raw=raw,
+      "power-invalid"    : power-invalid-alert --raw=raw,
+      "warning-channel"  : warning-alert-channel --raw=raw,
+      "critical-channel" : critical-alert-channel --raw=raw,
+      "summation"        : summation-alert --raw=raw,
+    }
+
+  /**
+  Reads the raw value of $REG-MASK-ENABLE_ with a single I2C transaction.
+
+  Note that reading this register clears the latched Warning, Critical, and
+    Summation alert flags on the device. Use $read-alert-status, or pass the
+    returned value as --raw to the individual flag accessors, to decode
+    several flags from one read rather than losing flags across separate
+    reads.
+  */
+  read-mask-enable-raw_ -> int:
+    return reg_.read-u16-be REG-MASK-ENABLE_
 
   /**
   Enables the specified channel.
@@ -624,7 +687,7 @@ class Ina3221:
       write-register_ REG-CONF_ 0 --mask=CONF-CH3-ENABLE-MASK_
 
   /**
-  Returns a count of the enamed channels.
+  Returns a count of the enabled channels.
   */
   enabled-channel-count -> int:
     out := 0
@@ -735,7 +798,7 @@ class Ina3221:
   Returns summed shunt voltage across channels (voltage).  See README.md
   */
   read-shunt-summation --voltage -> float:
-    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+    if not (current-LSB_.values.every: it == current-LSB_.values.first):
       throw "read-shunt-summation: summation invalid where shunt resistors differ."
     raw-counts := read-register_ REG-SHUNTVOLTAGE-SUM_ --mask=SUMMATION-MASK_ --signed
     return raw-counts * SHUNT-VOLTAGE-LSB_
@@ -744,7 +807,7 @@ class Ina3221:
   Returns summed shunt voltage across channels (current).  See README.md
   */
   read-shunt-summation --current -> float:
-    if not (current-LSB_.every: current-LSB_[it] == current-LSB_[1]):
+    if not (current-LSB_.values.every: it == current-LSB_.values.first):
       throw "read-shunt-summation: summation invalid where shunt resistors differ."
     raw-counts := read-register_ REG-SHUNTVOLTAGE-SUM_ --mask=SUMMATION-MASK_ --signed
     return raw-counts * current-LSB_[1]
