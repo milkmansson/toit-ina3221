@@ -509,10 +509,13 @@ class Ina3221:
   Returns true if conversion is still ongoing.
 
   Reading this consumes it. See README.md
+
+  If $raw is given, decodes the flag from that value instead of performing a
+    new I2C read; see $read-alert-status.
   */
-  is-conversion-ready -> bool:
-    raw/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-CONVERSION-READY-FLAG_
-    return raw == 1
+  is-conversion-ready --raw/int?=null -> bool:
+    value/int := raw != null ? raw : read-mask-enable-raw_
+    return (value & ALERT-CONVERSION-READY-FLAG_) != 0
 
   /**
   $timing-control-alert
@@ -523,10 +526,13 @@ class Ina3221:
     does not clear after it has been asserted unless the power is recycled or a
     software reset is issued. The default state for the timing control alert
     flag is high.
+
+  If $raw is given, decodes the flag from that value instead of performing a
+    new I2C read; see $read-alert-status.
   */
-  timing-control-alert -> bool:
-    value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-TIMING-CONTROL-FLAG_
-    return (value == 0)
+  timing-control-alert --raw/int?=null -> bool:
+    value/int := raw != null ? raw : read-mask-enable-raw_
+    return (value & ALERT-TIMING-CONTROL-FLAG_) == 0
 
   /**
   $power-invalid-alert: Power-valid-alert flag indicator.
@@ -540,10 +546,13 @@ class Ina3221:
     Mask/Enable mirrors the PV status so firmware can read it. So printing
     “Valid-Power-Alert triggered” when PVF=1 is a bit confusing—PVF=1 really
     means “rails are valid”.
+
+  If $raw is given, decodes the flag from that value instead of performing a
+    new I2C read; see $read-alert-status.
   */
-  power-invalid-alert -> bool:
-    value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-POWER-VALID-FLAG_
-    return (value == 0)
+  power-invalid-alert --raw/int?=null -> bool:
+    value/int := raw != null ? raw : read-mask-enable-raw_
+    return (value & ALERT-POWER-VALID-FLAG_) == 0
 
   /**
   $warning-alert-channel: Warning-alert flag indicator.
@@ -553,10 +562,16 @@ class Ina3221:
     asserted. Read these bits to determine which channel caused the warning
     alert.  The Warning Alert Flag bits clear when the Mask/Enable register is
     read back.
+
+  If $raw is given, decodes the flags from that value instead of performing a
+    new I2C read. Otherwise this performs its own read, which clears the
+    Warning, Critical, and Summation flags - use $read-alert-status instead of
+    calling this together with $critical-alert-channel or $summation-alert
+    separately, or a flag set by one call can be lost before the next call
+    reads it.
   */
-  warning-alert-channel -> int:
-    // Read once - reading clears the flags, so multiple reads would lose data.
-    register/int := read-register_ REG-MASK-ENABLE_
+  warning-alert-channel --raw/int?=null -> int:
+    register/int := raw != null ? raw : read-mask-enable-raw_
     if (register & ALERT-WARN-CH1-FLAG_) != 0: return 1
     if (register & ALERT-WARN-CH2-FLAG_) != 0: return 2
     if (register & ALERT-WARN-CH3-FLAG_) != 0: return 3
@@ -569,10 +584,13 @@ class Ina3221:
     Voltage Sum Limit register. If the summation alert flag is asserted, the
     Critical alert pin is also asserted. The Summation Alert Flag bit is cleared
     when the Mask/Enable register is read back.
+
+  If $raw is given, decodes the flag from that value instead of performing a
+    new I2C read; see $read-alert-status.
   */
-  summation-alert -> bool:
-    value/int := read-register_ REG-MASK-ENABLE_ --mask=ALERT-SUMMATION-FLAG_
-    return value == 1
+  summation-alert --raw/int?=null -> bool:
+    value/int := raw != null ? raw : read-mask-enable-raw_
+    return (value & ALERT-SUMMATION-FLAG_) != 0
 
   /**
   $critical-alert-channel: Critical alert flag indicator.
@@ -582,20 +600,67 @@ class Ina3221:
     resulting in the Critical alert pin being asserted. Read these bits to
     determine which channel caused the critical alert. The critical alert flag
     bits are cleared when the Mask/Enable register is read back.
+
+  If $raw is given, decodes the flags from that value instead of performing a
+    new I2C read. Otherwise this performs its own read, which clears the
+    Warning, Critical, and Summation flags - use $read-alert-status instead of
+    calling this together with $warning-alert-channel or $summation-alert
+    separately, or a flag set by one call can be lost before the next call
+    reads it.
   */
-  critical-alert-channel -> int:
-    // Read once - reading clears the flags, so multiple reads would lose data.
-    register/int := read-register_ REG-MASK-ENABLE_
+  critical-alert-channel --raw/int?=null -> int:
+    register/int := raw != null ? raw : read-mask-enable-raw_
     if (register & ALERT-CRITICAL-CH1-FLAG_) != 0: return 1
     if (register & ALERT-CRITICAL-CH2-FLAG_) != 0: return 2
     if (register & ALERT-CRITICAL-CH3-FLAG_) != 0: return 3
     return 0
 
   /**
-  Clears alerts flags.
+  Clears alert flags.
+
+  Reading $REG-MASK-ENABLE_ clears the latched Warning, Critical, and
+    Summation alert flags.
   */
   clear-alert -> none:
-    register/int := read-register_ REG-MASK-ENABLE_
+    read-mask-enable-raw_
+
+  /**
+  Reads all alert and status flags with a single I2C transaction.
+
+  Returns a map with keys "conversion-ready", "timing-control",
+    "power-invalid", "warning-channel", "critical-channel", and "summation",
+    decoded from one read of $REG-MASK-ENABLE_.
+
+  Prefer this over calling $is-conversion-ready, $power-invalid-alert,
+    $warning-alert-channel, $critical-alert-channel, and $summation-alert
+    separately when more than one flag is needed at once: each of those,
+    called without --raw, performs its own I2C read, and since reading
+    $REG-MASK-ENABLE_ clears the Warning, Critical, and Summation latches, a
+    later call could silently miss a flag an earlier call's read already
+    cleared.
+  */
+  read-alert-status -> Map:
+    raw := read-mask-enable-raw_
+    return {
+      "conversion-ready" : is-conversion-ready --raw=raw,
+      "timing-control"   : timing-control-alert --raw=raw,
+      "power-invalid"    : power-invalid-alert --raw=raw,
+      "warning-channel"  : warning-alert-channel --raw=raw,
+      "critical-channel" : critical-alert-channel --raw=raw,
+      "summation"        : summation-alert --raw=raw,
+    }
+
+  /**
+  Reads the raw value of $REG-MASK-ENABLE_ with a single I2C transaction.
+
+  Note that reading this register clears the latched Warning, Critical, and
+    Summation alert flags on the device. Use $read-alert-status, or pass the
+    returned value as --raw to the individual flag accessors, to decode
+    several flags from one read rather than losing flags across separate
+    reads.
+  */
+  read-mask-enable-raw_ -> int:
+    return reg_.read-u16-be REG-MASK-ENABLE_
 
   /**
   Enables the specified channel.
