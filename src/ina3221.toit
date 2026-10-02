@@ -880,6 +880,9 @@ class Ina3221:
   Given that register reads are largely similar, implemented here.  If the mask
     is left at 0xFFFF (and offset remains at 0x0), it is a read from the whole
     register.
+
+  If $signed is true, the masked field is returned as a two's complement
+    value, so a 13 bit field reads as -4096 to 4095.
   */
   read-register_ -> int
       register/int
@@ -895,6 +898,12 @@ class Ina3221:
       return register-value
     else:
       masked-value := (register-value & mask) >> offset
+      if signed:
+        // The masking above dropped the sign extension of the 16-bit read, so
+        // sign-extend the field itself (for example 13 bits for the shunt and
+        // bus voltage registers, where bits 2..0 are always zero).
+        range := (mask >> offset) + 1
+        if masked-value >= range / 2: masked-value -= range
       return masked-value
 
   /**
